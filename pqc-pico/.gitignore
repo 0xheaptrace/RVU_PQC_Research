@@ -1,0 +1,8 @@
+build/
+.direnv/
+.envrc
+*.elf
+*.bin
+*.hex
+*.uf2
+*.map
