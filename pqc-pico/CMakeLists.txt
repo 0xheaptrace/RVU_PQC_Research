@@ -15,7 +15,6 @@ add_compile_definitions(PICO_HEAP_SIZE=0x4000)
 
 add_executable(pqc_pico
 
-    # Your application
     src/main.c
     src/randombytes.c
 
