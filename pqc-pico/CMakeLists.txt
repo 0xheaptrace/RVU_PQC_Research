@@ -18,7 +18,6 @@ add_executable(pqc_pico
     src/main.c
     src/randombytes.c
     src/benchmark.c
-    src/mlkem_demo.c
 
     # PQClean ML-KEM-512
     ../PQClean/crypto_kem/ml-kem-512/clean/cbd.c
@@ -46,6 +45,7 @@ target_include_directories(pqc_pico PRIVATE
 target_link_libraries(pqc_pico
     pico_stdlib
     pico_rand
+    m
 )
 
 pico_enable_stdio_usb(pqc_pico 1)

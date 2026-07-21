@@ -1,17 +1,16 @@
-#include "benchmark.h"
-
 #include <stdio.h>
-#include <string.h>
+#include <stdint.h>
+#include <math.h>
 
 #include "pico/stdlib.h"
+#include "hardware/clocks.h"
 
+#include "benchmark.h"
 #include "api.h"
 
 
-#define WARMUP_ITERATIONS 10
-#define BENCHMARK_ITERATIONS 1000
-
-#define CPU_FREQ_MHZ 150
+#define ITERATIONS 10000
+#define WARMUP 100
 
 
 static uint8_t public_key[PQCLEAN_MLKEM512_CLEAN_CRYPTO_PUBLICKEYBYTES];
@@ -20,279 +19,414 @@ static uint8_t secret_key[PQCLEAN_MLKEM512_CLEAN_CRYPTO_SECRETKEYBYTES];
 
 static uint8_t ciphertext[PQCLEAN_MLKEM512_CLEAN_CRYPTO_CIPHERTEXTBYTES];
 
-static uint8_t shared_secret_enc[PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES];
+static uint8_t shared_secret1[PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES];
 
-static uint8_t shared_secret_dec[PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES];
-
-
-static uint64_t keygen_times[BENCHMARK_ITERATIONS];
-
-static uint64_t enc_times[BENCHMARK_ITERATIONS];
-
-static uint64_t dec_times[BENCHMARK_ITERATIONS];
-
-static uint64_t total_times[BENCHMARK_ITERATIONS];
+static uint8_t shared_secret2[PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES];
 
 
-
-static uint64_t convert_cycles(uint64_t microseconds)
+typedef struct
 {
-    return microseconds * CPU_FREQ_MHZ;
+    uint64_t total_time;
+    uint64_t total_cycles;
+
+    double sum_squared_diff;
+
+    uint32_t min_time;
+    uint32_t max_time;
+
+} benchmark_result_t;
+
+
+
+static uint32_t get_time_us()
+{
+    return time_us_32();
 }
 
 
 
-static void calculate_statistics(uint64_t *data,
-                                 uint64_t *mean,
-                                 uint64_t *minimum,
-                                 uint64_t *maximum)
+static uint64_t calculate_cycles(uint32_t time_us)
 {
-    uint64_t sum = 0;
+    uint64_t clock_mhz;
 
-    *minimum = data[0];
-    *maximum = data[0];
+    clock_mhz = clock_get_hz(clk_sys) / 1000000;
+
+    return ((uint64_t)time_us * clock_mhz);
+}
 
 
-    for(int i = 0; i < BENCHMARK_ITERATIONS; i++)
+
+
+
+void print_processor_info(void)
+{
+
+    printf("\n");
+    printf("============================================================\n");
+    printf("                 Processor Information\n");
+    printf("============================================================\n");
+
+
+#if defined(__riscv)
+
+    printf("Architecture : RISC-V\n");
+
+
+#ifdef __riscv_xlen
+    printf("XLEN         : %d-bit\n", __riscv_xlen);
+#endif
+
+
+#ifdef __riscv_mul
+    printf("Extension    : M (Multiply)\n");
+#endif
+
+
+#ifdef __riscv_atomic
+    printf("Extension    : A (Atomic)\n");
+#endif
+
+
+#ifdef __riscv_compressed
+    printf("Extension    : C (Compressed)\n");
+#endif
+
+
+#else
+
+    printf("Architecture : ARM\n");
+
+#endif
+
+
+
+    printf("CPU Clock    : %lu MHz\n",
+           clock_get_hz(clk_sys) / 1000000);
+
+
+
+    printf("Compiler     : %s\n",
+           __VERSION__);
+
+
+
+    printf("============================================================\n\n");
+
+}
+
+
+
+
+
+static double calculate_stddev(benchmark_result_t result)
+{
+
+    double variance =
+        result.sum_squared_diff / ITERATIONS;
+
+
+    return sqrt(variance);
+
+}
+
+
+
+
+
+
+static void print_result(
+        const char *name,
+        benchmark_result_t result)
+{
+
+    uint64_t mean_time =
+        result.total_time / ITERATIONS;
+
+
+    uint64_t mean_cycles =
+        result.total_cycles / ITERATIONS;
+
+
+    double stddev =
+        calculate_stddev(result);
+
+
+
+    printf("| %-14s | %11llu | %11.3f | %11llu | %11lu | %11lu | %10.2f |\n",
+           name,
+           mean_time,
+           mean_time / 1000.0,
+           mean_cycles,
+           result.min_time,
+           result.max_time,
+           stddev);
+
+}
+
+
+
+
+
+
+
+static void benchmark_operation(
+        const char *name,
+        int operation)
+{
+
+    benchmark_result_t result = {0};
+
+
+    result.min_time = 0xffffffff;
+
+
+
+    for(int i = 0; i < ITERATIONS; i++)
     {
-        if(data[i] < *minimum)
-            *minimum = data[i];
 
-        if(data[i] > *maximum)
-            *maximum = data[i];
+        uint32_t start_time =
+            get_time_us();
 
-        sum += data[i];
+
+
+        if(operation == 0)
+        {
+
+            PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
+                public_key,
+                secret_key);
+
+        }
+
+
+        else if(operation == 1)
+        {
+
+            PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(
+                ciphertext,
+                shared_secret1,
+                public_key);
+
+        }
+
+
+        else if(operation == 2)
+        {
+
+            PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(
+                shared_secret2,
+                ciphertext,
+                secret_key);
+
+        }
+
+
+
+        uint32_t elapsed =
+            get_time_us() - start_time;
+
+
+
+        uint64_t cycles =
+            calculate_cycles(elapsed);
+
+
+
+        result.total_time += elapsed;
+
+        result.total_cycles += cycles;
+
+
+
+        double diff =
+            elapsed -
+            ((double)result.total_time / (i + 1));
+
+
+        result.sum_squared_diff +=
+            diff * diff;
+
+
+
+        if(elapsed < result.min_time)
+            result.min_time = elapsed;
+
+
+
+        if(elapsed > result.max_time)
+            result.max_time = elapsed;
+
     }
 
 
-    *mean = sum / BENCHMARK_ITERATIONS;
+
+    print_result(name,result);
+
 }
 
 
 
-static void print_benchmark_table(void)
+
+
+
+
+
+
+static void benchmark_total_kem()
 {
-    uint64_t key_mean;
-    uint64_t key_min;
-    uint64_t key_max;
 
-    uint64_t enc_mean;
-    uint64_t enc_min;
-    uint64_t enc_max;
+    benchmark_result_t result = {0};
 
-    uint64_t dec_mean;
-    uint64_t dec_min;
-    uint64_t dec_max;
 
-    uint64_t total_mean;
-    uint64_t total_min;
-    uint64_t total_max;
+    result.min_time = 0xffffffff;
 
 
 
-    calculate_statistics(
-        keygen_times,
-        &key_mean,
-        &key_min,
-        &key_max
-    );
+    for(int i = 0; i < ITERATIONS; i++)
+    {
+
+        uint32_t start_time =
+            get_time_us();
 
 
-    calculate_statistics(
-        enc_times,
-        &enc_mean,
-        &enc_min,
-        &enc_max
-    );
+
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
+            public_key,
+            secret_key);
 
 
-    calculate_statistics(
-        dec_times,
-        &dec_mean,
-        &dec_min,
-        &dec_max
-    );
+
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(
+            ciphertext,
+            shared_secret1,
+            public_key);
 
 
-    calculate_statistics(
-        total_times,
-        &total_mean,
-        &total_min,
-        &total_max
-    );
+
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(
+            shared_secret2,
+            ciphertext,
+            secret_key);
 
 
+
+
+        uint32_t elapsed =
+            get_time_us() - start_time;
+
+
+
+        uint64_t cycles =
+            calculate_cycles(elapsed);
+
+
+
+        result.total_time += elapsed;
+
+        result.total_cycles += cycles;
+
+
+
+        double diff =
+            elapsed -
+            ((double)result.total_time / (i + 1));
+
+
+        result.sum_squared_diff +=
+            diff * diff;
+
+
+
+        if(elapsed < result.min_time)
+            result.min_time = elapsed;
+
+
+
+        if(elapsed > result.max_time)
+            result.max_time = elapsed;
+
+    }
+
+
+
+    print_result("Total KEM",result);
+
+}
+
+
+
+
+
+
+
+void run_benchmark(void)
+{
 
     printf("\n");
     printf("============================================================\n");
     printf("              ML-KEM-512 Benchmark Results\n");
-    printf("              Raspberry Pi Pico 2 W (RP2350)\n");
-    printf("              ARM Cortex-M33 @ 150 MHz\n");
     printf("============================================================\n\n");
 
 
-    printf("Iterations: %d\n\n", BENCHMARK_ITERATIONS);
+
+    printf("Warmup iterations: %d\n",WARMUP);
 
 
 
-    printf("+----------------+-------------+-------------+-------------+-------------+-------------+\n");
-    printf("| Operation      | Mean (us)   | Mean (ms)   | Cycles      | Min (us)    | Max (us)    |\n");
-    printf("+----------------+-------------+-------------+-------------+-------------+-------------+\n");
-
-
-    printf("| Key Generation | %-11llu | %-11.3f | %-11llu | %-11llu | %-11llu |\n",
-           key_mean,
-           key_mean / 1000.0,
-           convert_cycles(key_mean),
-           key_min,
-           key_max);
-
-
-    printf("| Encapsulation  | %-11llu | %-11.3f | %-11llu | %-11llu | %-11llu |\n",
-           enc_mean,
-           enc_mean / 1000.0,
-           convert_cycles(enc_mean),
-           enc_min,
-           enc_max);
-
-
-    printf("| Decapsulation  | %-11llu | %-11.3f | %-11llu | %-11llu | %-11llu |\n",
-           dec_mean,
-           dec_mean / 1000.0,
-           convert_cycles(dec_mean),
-           dec_min,
-           dec_max);
-
-
-    printf("| Total KEM      | %-11llu | %-11.3f | %-11llu | %-11llu | %-11llu |\n",
-           total_mean,
-           total_mean / 1000.0,
-           convert_cycles(total_mean),
-           total_min,
-           total_max);
-
-
-    printf("+----------------+-------------+-------------+-------------+-------------+-------------+\n");
-
-}
-
-
-
-void run_mlkem512_benchmark(void)
-{
-
-    printf("\n");
-    printf("============================================================\n");
-    printf("              ML-KEM-512 Benchmark\n");
-    printf("        Raspberry Pi Pico 2 W (RP2350)\n");
-    printf("============================================================\n");
-
-
-
-    printf("\nWarmup iterations: %d\n", WARMUP_ITERATIONS);
-
-
-
-    for(int i = 0; i < WARMUP_ITERATIONS; i++)
+    for(int i=0;i<WARMUP;i++)
     {
 
         PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
             public_key,
-            secret_key
-        );
-
-
-        PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(
-            ciphertext,
-            shared_secret_enc,
-            public_key
-        );
-
-
-        PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(
-            shared_secret_dec,
-            ciphertext,
-            secret_key
-        );
+            secret_key);
 
     }
 
 
 
-    printf("Warmup complete\n");
-
-
-    printf("\nRunning benchmark: %d iterations\n",
-           BENCHMARK_ITERATIONS);
+    printf("Warmup complete\n\n");
 
 
 
-    for(int i = 0; i < BENCHMARK_ITERATIONS; i++)
-    {
-
-        uint64_t total_start = time_us_64();
-
-
-        uint64_t start = time_us_64();
-
-
-        PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
-            public_key,
-            secret_key
-        );
-
-
-        keygen_times[i] = time_us_64() - start;
+    printf("Running benchmark: %d iterations\n\n",
+           ITERATIONS);
 
 
 
-        start = time_us_64();
 
 
-        PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(
-            ciphertext,
-            shared_secret_enc,
-            public_key
-        );
+    printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
 
+    printf("| Operation      | Mean (us)   | Mean (ms)   | Cycles      | Min (us)    | Max (us)    | Std Dev    |\n");
 
-        enc_times[i] = time_us_64() - start;
+    printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
 
 
 
-        start = time_us_64();
-
-
-        PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(
-            shared_secret_dec,
-            ciphertext,
-            secret_key
-        );
-
-
-        dec_times[i] = time_us_64() - start;
+    benchmark_operation(
+        "Key Generation",
+        0);
 
 
 
-        total_times[i] = time_us_64() - total_start;
+    benchmark_operation(
+        "Encapsulation",
+        1);
 
 
 
-        if(memcmp(shared_secret_enc,
-                  shared_secret_dec,
-                  PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES) != 0)
-        {
-
-            printf("KEM verification failed at iteration %d\n", i);
-
-            return;
-        }
-
-    }
+    benchmark_operation(
+        "Decapsulation",
+        2);
 
 
 
-    print_benchmark_table();
+    benchmark_total_kem();
+
+
+
+    printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
+
 
 
     printf("\nBenchmark completed.\n");
