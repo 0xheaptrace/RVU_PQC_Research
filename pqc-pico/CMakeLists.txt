@@ -7,6 +7,7 @@ project(pqc_pico C CXX ASM)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
+
 pico_sdk_init()
 
 
@@ -22,21 +23,19 @@ add_executable(pqc_pico
     src/benchmark.c
 
 
-    # PQClean ML-KEM-512
-
-    ../PQClean/crypto_kem/ml-kem-512/clean/cbd.c
-    ../PQClean/crypto_kem/ml-kem-512/clean/indcpa.c
-    ../PQClean/crypto_kem/ml-kem-512/clean/kem.c
-    ../PQClean/crypto_kem/ml-kem-512/clean/ntt.c
-    ../PQClean/crypto_kem/ml-kem-512/clean/poly.c
-    ../PQClean/crypto_kem/ml-kem-512/clean/polyvec.c
-    ../PQClean/crypto_kem/ml-kem-512/clean/reduce.c
-    ../PQClean/crypto_kem/ml-kem-512/clean/symmetric-shake.c
-    ../PQClean/crypto_kem/ml-kem-512/clean/verify.c
+    # PQClean ML-KEM-768 Clean Implementation
+    ../PQClean/crypto_kem/ml-kem-768/clean/cbd.c
+    ../PQClean/crypto_kem/ml-kem-768/clean/indcpa.c
+    ../PQClean/crypto_kem/ml-kem-768/clean/kem.c
+    ../PQClean/crypto_kem/ml-kem-768/clean/ntt.c
+    ../PQClean/crypto_kem/ml-kem-768/clean/poly.c
+    ../PQClean/crypto_kem/ml-kem-768/clean/polyvec.c
+    ../PQClean/crypto_kem/ml-kem-768/clean/reduce.c
+    ../PQClean/crypto_kem/ml-kem-768/clean/symmetric-shake.c
+    ../PQClean/crypto_kem/ml-kem-768/clean/verify.c
 
 
     # PQClean common
-
     ../PQClean/common/fips202.c
 
 )
@@ -48,7 +47,8 @@ target_include_directories(pqc_pico PRIVATE
     src
 
     ../PQClean/common
-    ../PQClean/crypto_kem/ml-kem-512/clean
+
+    ../PQClean/crypto_kem/ml-kem-768/clean
 
 )
 

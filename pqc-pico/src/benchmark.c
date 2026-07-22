@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <math.h>
 
 #include "pico/stdlib.h"
@@ -12,37 +13,40 @@
 #define WARMUP 100
 
 
+
 static uint8_t public_key[
-    PQCLEAN_MLKEM512_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_MLKEM768_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 static uint8_t secret_key[
-    PQCLEAN_MLKEM512_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_MLKEM768_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 static uint8_t ciphertext[
-    PQCLEAN_MLKEM512_CLEAN_CRYPTO_CIPHERTEXTBYTES
+    PQCLEAN_MLKEM768_CLEAN_CRYPTO_CIPHERTEXTBYTES
 ];
 
 static uint8_t shared_secret1[
-    PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLKEM768_CLEAN_CRYPTO_BYTES
 ];
 
 static uint8_t shared_secret2[
-    PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLKEM768_CLEAN_CRYPTO_BYTES
 ];
+
+
 
 
 
 typedef struct
 {
     uint64_t total_time;
+
     uint64_t total_cycles;
 
     uint32_t min_time;
-    uint32_t max_time;
 
-    double mean;
+    uint32_t max_time;
 
     double variance;
 
@@ -50,9 +54,13 @@ typedef struct
 
 
 
+
+
+
 /*
  * Enable RISC-V hardware cycle counter
  */
+
 static inline void enable_cycle_counter()
 {
     uint32_t value = 0;
@@ -67,9 +75,13 @@ static inline void enable_cycle_counter()
 
 
 
+
+
+
 /*
  * Read 64-bit RISC-V mcycle counter
  */
+
 static inline uint64_t read_cycle_counter()
 {
     uint32_t hi1;
@@ -104,6 +116,10 @@ static inline uint64_t read_cycle_counter()
 
     return ((uint64_t)hi1 << 32) | lo;
 }
+
+
+
+
 
 
 
@@ -164,6 +180,7 @@ void print_processor_info(void)
 #endif
 
 
+
     printf("Compiler     : %s\n",
            __VERSION__);
 
@@ -171,6 +188,8 @@ void print_processor_info(void)
     printf("============================================================\n\n");
 
 }
+
+
 
 
 
@@ -193,10 +212,14 @@ static double calculate_stddev(
 
 
 
+
+
+
 static void print_result(
         const char *name,
         benchmark_result_t *result)
 {
+
 
     uint64_t mean_time =
         result->total_time / ITERATIONS;
@@ -208,7 +231,7 @@ static void print_result(
 
 
     printf(
-    "| %-14s | %11llu | %11.3f | %11llu | %11u | %11u | %10.2f |\n",
+    "| %-14s | %11" PRIu64 " | %11.3f | %11" PRIu64 " | %11u | %11u | %10.2f |\n",
 
     name,
 
@@ -235,10 +258,12 @@ static void print_result(
 
 
 
+
 static void benchmark_operation(
         const char *name,
         int operation)
 {
+
 
     benchmark_result_t result = {0};
 
@@ -259,9 +284,9 @@ static void benchmark_operation(
             time_us_32();
 
 
-
         uint64_t start_cycles =
             read_cycle_counter();
+
 
 
 
@@ -269,7 +294,7 @@ static void benchmark_operation(
         if(operation == 0)
         {
 
-            PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
+            PQCLEAN_MLKEM768_CLEAN_crypto_kem_keypair(
                 public_key,
                 secret_key);
 
@@ -279,7 +304,7 @@ static void benchmark_operation(
         else if(operation == 1)
         {
 
-            PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(
+            PQCLEAN_MLKEM768_CLEAN_crypto_kem_enc(
                 ciphertext,
                 shared_secret1,
                 public_key);
@@ -290,7 +315,7 @@ static void benchmark_operation(
         else
         {
 
-            PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(
+            PQCLEAN_MLKEM768_CLEAN_crypto_kem_dec(
                 shared_secret2,
                 ciphertext,
                 secret_key);
@@ -300,6 +325,7 @@ static void benchmark_operation(
 
 
 
+
         uint64_t end_cycles =
             read_cycle_counter();
 
@@ -324,112 +350,10 @@ static void benchmark_operation(
             result.min_time = elapsed_time;
 
 
-
         if(elapsed_time > result.max_time)
             result.max_time = elapsed_time;
 
 
-
-        double delta =
-            elapsed_time - mean;
-
-
-        mean += delta / (i + 1);
-
-
-        result.variance +=
-            delta *
-            (elapsed_time - mean);
-
-    }
-
-
-
-    print_result(name,&result);
-
-}
-
-
-
-
-
-
-
-static void benchmark_total_kem()
-{
-
-    benchmark_result_t result={0};
-
-
-    result.min_time = 0xffffffff;
-
-
-
-    double mean = 0;
-
-
-
-    for(int i=0;i<ITERATIONS;i++)
-    {
-
-
-        uint32_t start_time =
-            time_us_32();
-
-
-        uint64_t start_cycles =
-            read_cycle_counter();
-
-
-
-        PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
-            public_key,
-            secret_key);
-
-
-
-        PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(
-            ciphertext,
-            shared_secret1,
-            public_key);
-
-
-
-        PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(
-            shared_secret2,
-            ciphertext,
-            secret_key);
-
-
-
-        uint64_t end_cycles =
-            read_cycle_counter();
-
-
-
-        uint32_t elapsed_time =
-            time_us_32() - start_time;
-
-
-
-        uint64_t elapsed_cycles =
-            end_cycles - start_cycles;
-
-
-
-        result.total_time += elapsed_time;
-
-        result.total_cycles += elapsed_cycles;
-
-
-
-        if(elapsed_time < result.min_time)
-            result.min_time = elapsed_time;
-
-
-
-        if(elapsed_time > result.max_time)
-            result.max_time = elapsed_time;
 
 
 
@@ -447,9 +371,131 @@ static void benchmark_total_kem()
 
 
 
-    print_result("Total KEM",&result);
+    print_result(
+        name,
+        &result
+    );
 
 }
+
+
+
+
+
+
+
+
+
+static void benchmark_total_kem()
+{
+
+
+    benchmark_result_t result={0};
+
+
+    result.min_time = 0xffffffff;
+
+
+
+    double mean = 0;
+
+
+
+
+    for(int i = 0; i < ITERATIONS; i++)
+    {
+
+
+        uint32_t start_time =
+            time_us_32();
+
+
+        uint64_t start_cycles =
+            read_cycle_counter();
+
+
+
+
+
+        PQCLEAN_MLKEM768_CLEAN_crypto_kem_keypair(
+            public_key,
+            secret_key);
+
+
+
+        PQCLEAN_MLKEM768_CLEAN_crypto_kem_enc(
+            ciphertext,
+            shared_secret1,
+            public_key);
+
+
+
+        PQCLEAN_MLKEM768_CLEAN_crypto_kem_dec(
+            shared_secret2,
+            ciphertext,
+            secret_key);
+
+
+
+
+
+        uint64_t end_cycles =
+            read_cycle_counter();
+
+
+
+
+        uint32_t elapsed_time =
+            time_us_32() - start_time;
+
+
+
+        uint64_t elapsed_cycles =
+            end_cycles - start_cycles;
+
+
+
+
+        result.total_time += elapsed_time;
+
+        result.total_cycles += elapsed_cycles;
+
+
+
+
+        if(elapsed_time < result.min_time)
+            result.min_time = elapsed_time;
+
+
+        if(elapsed_time > result.max_time)
+            result.max_time = elapsed_time;
+
+
+
+
+
+        double delta =
+            elapsed_time - mean;
+
+
+        mean += delta/(i+1);
+
+
+        result.variance +=
+            delta*(elapsed_time-mean);
+
+    }
+
+
+
+
+    print_result(
+        "Total KEM",
+        &result
+    );
+
+}
+
 
 
 
@@ -466,21 +512,25 @@ void run_benchmark(void)
 
     printf("\n");
     printf("============================================================\n");
-    printf("              ML-KEM-512 Benchmark Results\n");
+    printf("              ML-KEM-768 Benchmark Results\n");
     printf("============================================================\n\n");
 
 
 
-    printf("Warmup iterations: %d\n",WARMUP);
+    printf("Warmup iterations: %d\n",
+           WARMUP);
 
 
 
     for(int i=0;i<WARMUP;i++)
     {
-        PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
+
+        PQCLEAN_MLKEM768_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key);
+
     }
+
 
 
     printf("Warmup complete\n\n");
@@ -491,11 +541,13 @@ void run_benchmark(void)
 
 
 
+
     printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
 
     printf("| Operation      | Mean (us)   | Mean (ms)   | Cycles      | Min (us)    | Max (us)    | Std Dev    |\n");
 
     printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
+
 
 
 
@@ -518,6 +570,7 @@ void run_benchmark(void)
 
 
     benchmark_total_kem();
+
 
 
 
