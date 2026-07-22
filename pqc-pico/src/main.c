@@ -11,28 +11,29 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_MLKEM768_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 static uint8_t secret_key[
-    PQCLEAN_MLKEM768_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 static uint8_t ciphertext[
-    PQCLEAN_MLKEM768_CLEAN_CRYPTO_CIPHERTEXTBYTES
+    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_CIPHERTEXTBYTES
 ];
 
 
 static uint8_t shared_secret_enc[
-    PQCLEAN_MLKEM768_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_BYTES
 ];
 
 
 static uint8_t shared_secret_dec[
-    PQCLEAN_MLKEM768_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_BYTES
 ];
+
 
 
 
@@ -42,7 +43,7 @@ static void print_banner(void)
 
     printf("\n");
     printf("============================================================\n");
-    printf("            ML-KEM-768 Functional Validation\n");
+    printf("            ML-KEM-1024 Functional Validation\n");
     printf("         Raspberry Pi Pico 2 W (RP2350)\n");
     printf("         PQClean Clean Implementation\n");
     printf("============================================================\n\n");
@@ -73,10 +74,10 @@ int main(void)
 
 
 
-    printf("[1/4] Generating ML-KEM-768 Key Pair...\n\n");
+    printf("[1/4] Generating ML-KEM-1024 Key Pair...\n\n");
 
 
-    if(PQCLEAN_MLKEM768_CLEAN_crypto_kem_keypair(
+    if(PQCLEAN_MLKEM1024_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key) != 0)
     {
@@ -96,10 +97,11 @@ int main(void)
 
 
 
+
     printf("[2/4] Performing Encapsulation...\n\n");
 
 
-    if(PQCLEAN_MLKEM768_CLEAN_crypto_kem_enc(
+    if(PQCLEAN_MLKEM1024_CLEAN_crypto_kem_enc(
             ciphertext,
             shared_secret_enc,
             public_key) != 0)
@@ -121,10 +123,12 @@ int main(void)
 
 
 
+
+
     printf("[3/4] Performing Decapsulation...\n\n");
 
 
-    if(PQCLEAN_MLKEM768_CLEAN_crypto_kem_dec(
+    if(PQCLEAN_MLKEM1024_CLEAN_crypto_kem_dec(
             shared_secret_dec,
             ciphertext,
             secret_key) != 0)
@@ -147,6 +151,8 @@ int main(void)
 
 
 
+
+
     printf("[4/4] Verifying Shared Secrets...\n\n");
 
 
@@ -160,11 +166,11 @@ int main(void)
     if(memcmp(
         shared_secret_enc,
         shared_secret_dec,
-        PQCLEAN_MLKEM768_CLEAN_CRYPTO_BYTES) == 0)
+        PQCLEAN_MLKEM1024_CLEAN_CRYPTO_BYTES) == 0)
     {
 
         printf("PASS: Shared secrets are identical.\n");
-        printf("ML-KEM-768 functional validation successful.\n");
+        printf("ML-KEM-1024 functional validation successful.\n");
 
     }
 
@@ -172,12 +178,13 @@ int main(void)
     {
 
         printf("FAIL: Shared secrets do not match.\n");
-        printf("ML-KEM-768 functional validation failed.\n");
+        printf("ML-KEM-1024 functional validation failed.\n");
 
     }
 
 
     printf("=============================================\n\n");
+
 
 
 
