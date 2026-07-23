@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.13)
 
 include(pico_sdk_import.cmake)
 
-
 project(pqc_pico C CXX ASM)
 
 
@@ -13,34 +12,28 @@ set(CMAKE_CXX_STANDARD 17)
 pico_sdk_init()
 
 
-
 add_compile_definitions(PICO_STACK_SIZE=0x8000)
 add_compile_definitions(PICO_HEAP_SIZE=0x4000)
 
 
 
-
-
 add_executable(pqc_pico
-
 
     src/main.c
     src/randombytes.c
     src/benchmark.c
 
 
+    # PQClean ML-DSA-87 Clean Implementation
 
-    # PQClean ML-DSA-65 Clean Implementation
-
-    ../PQClean/crypto_sign/ml-dsa-65/clean/sign.c
-    ../PQClean/crypto_sign/ml-dsa-65/clean/ntt.c
-    ../PQClean/crypto_sign/ml-dsa-65/clean/packing.c
-    ../PQClean/crypto_sign/ml-dsa-65/clean/poly.c
-    ../PQClean/crypto_sign/ml-dsa-65/clean/polyvec.c
-    ../PQClean/crypto_sign/ml-dsa-65/clean/reduce.c
-    ../PQClean/crypto_sign/ml-dsa-65/clean/rounding.c
-    ../PQClean/crypto_sign/ml-dsa-65/clean/symmetric-shake.c
-
+    ../PQClean/crypto_sign/ml-dsa-87/clean/sign.c
+    ../PQClean/crypto_sign/ml-dsa-87/clean/ntt.c
+    ../PQClean/crypto_sign/ml-dsa-87/clean/packing.c
+    ../PQClean/crypto_sign/ml-dsa-87/clean/poly.c
+    ../PQClean/crypto_sign/ml-dsa-87/clean/polyvec.c
+    ../PQClean/crypto_sign/ml-dsa-87/clean/reduce.c
+    ../PQClean/crypto_sign/ml-dsa-87/clean/rounding.c
+    ../PQClean/crypto_sign/ml-dsa-87/clean/symmetric-shake.c
 
 
     # PQClean common
@@ -51,32 +44,19 @@ add_executable(pqc_pico
 
 
 
-
-
-
-
 target_include_directories(pqc_pico PRIVATE
-
 
     src
 
-
     ../PQClean/common
 
-
-    ../PQClean/crypto_sign/ml-dsa-65/clean
-
+    ../PQClean/crypto_sign/ml-dsa-87/clean
 
 )
 
 
 
-
-
-
-
 target_link_libraries(pqc_pico
-
 
     pico_stdlib
     pico_rand
@@ -86,30 +66,16 @@ target_link_libraries(pqc_pico
 
 
 
-
-
-
-
-
 pico_enable_stdio_usb(pqc_pico 1)
-
 pico_enable_stdio_uart(pqc_pico 0)
 
 
-
-
-
-
-
-
-# RP2350 RAM configuration
 
 pico_set_linker_script_var(
     pqc_pico
     RAM_LENGTH
     448k
 )
-
 
 
 pico_set_linker_script_var(
@@ -119,18 +85,11 @@ pico_set_linker_script_var(
 )
 
 
-
 pico_set_linker_script_var(
     pqc_pico
     SCRATCH_Y_LENGTH
     64k
 )
-
-
-
-
-
-
 
 
 pico_add_extra_outputs(pqc_pico)
