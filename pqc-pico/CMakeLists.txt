@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.13)
 
-
 include(pico_sdk_import.cmake)
 
 
@@ -9,7 +8,6 @@ project(pqc_pico C CXX ASM)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
-
 
 
 pico_sdk_init()
@@ -27,23 +25,21 @@ add_executable(pqc_pico
 
 
     src/main.c
-
     src/randombytes.c
-
     src/benchmark.c
 
 
 
-    # PQClean ML-DSA-44 Clean Implementation
+    # PQClean ML-DSA-65 Clean Implementation
 
-    ../PQClean/crypto_sign/ml-dsa-44/clean/sign.c
-    ../PQClean/crypto_sign/ml-dsa-44/clean/packing.c
-    ../PQClean/crypto_sign/ml-dsa-44/clean/poly.c
-    ../PQClean/crypto_sign/ml-dsa-44/clean/polyvec.c
-    ../PQClean/crypto_sign/ml-dsa-44/clean/ntt.c
-    ../PQClean/crypto_sign/ml-dsa-44/clean/reduce.c
-    ../PQClean/crypto_sign/ml-dsa-44/clean/rounding.c
-    ../PQClean/crypto_sign/ml-dsa-44/clean/symmetric-shake.c
+    ../PQClean/crypto_sign/ml-dsa-65/clean/sign.c
+    ../PQClean/crypto_sign/ml-dsa-65/clean/ntt.c
+    ../PQClean/crypto_sign/ml-dsa-65/clean/packing.c
+    ../PQClean/crypto_sign/ml-dsa-65/clean/poly.c
+    ../PQClean/crypto_sign/ml-dsa-65/clean/polyvec.c
+    ../PQClean/crypto_sign/ml-dsa-65/clean/reduce.c
+    ../PQClean/crypto_sign/ml-dsa-65/clean/rounding.c
+    ../PQClean/crypto_sign/ml-dsa-65/clean/symmetric-shake.c
 
 
 
@@ -52,6 +48,8 @@ add_executable(pqc_pico
     ../PQClean/common/fips202.c
 
 )
+
+
 
 
 
@@ -66,7 +64,8 @@ target_include_directories(pqc_pico PRIVATE
     ../PQClean/common
 
 
-    ../PQClean/crypto_sign/ml-dsa-44/clean
+    ../PQClean/crypto_sign/ml-dsa-65/clean
+
 
 )
 
@@ -80,12 +79,12 @@ target_link_libraries(pqc_pico
 
 
     pico_stdlib
-
     pico_rand
-
     m
 
 )
+
+
 
 
 
@@ -101,6 +100,9 @@ pico_enable_stdio_uart(pqc_pico 0)
 
 
 
+
+
+# RP2350 RAM configuration
 
 pico_set_linker_script_var(
     pqc_pico
@@ -123,6 +125,8 @@ pico_set_linker_script_var(
     SCRATCH_Y_LENGTH
     64k
 )
+
+
 
 
 

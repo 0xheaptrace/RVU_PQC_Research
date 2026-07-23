@@ -2,30 +2,28 @@
 #include <string.h>
 #include <stdint.h>
 
-
 #include "pico/stdlib.h"
 #include "pico/stdio_usb.h"
-
 
 #include "api.h"
 #include "benchmark.h"
 
 
 
-
 static uint8_t public_key[
-    PQCLEAN_MLDSA44_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_MLDSA65_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 static uint8_t secret_key[
-    PQCLEAN_MLDSA44_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_MLDSA65_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 static uint8_t signature[
-    PQCLEAN_MLDSA44_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLDSA65_CLEAN_CRYPTO_BYTES
 ];
+
 
 
 static uint8_t message[32] =
@@ -42,22 +40,17 @@ static uint8_t message[32] =
 
 
 
-
-
 static void print_banner(void)
 {
 
     printf("\n");
     printf("============================================================\n");
-    printf("            ML-DSA-44 Functional Validation\n");
+    printf("            ML-DSA-65 Functional Validation\n");
     printf("         Raspberry Pi Pico 2 W (RP2350)\n");
     printf("         PQClean Clean Implementation\n");
     printf("============================================================\n\n");
 
 }
-
-
-
 
 
 
@@ -69,12 +62,10 @@ int main(void)
     stdio_init_all();
 
 
-
     while(!stdio_usb_connected())
     {
         sleep_ms(100);
     }
-
 
 
     sleep_ms(1000);
@@ -85,12 +76,10 @@ int main(void)
 
 
 
-
-    printf("[1/4] Generating ML-DSA-44 Key Pair...\n\n");
-
+    printf("[1/4] Generating ML-DSA-65 Key Pair...\n\n");
 
 
-    if(PQCLEAN_MLDSA44_CLEAN_crypto_sign_keypair(
+    if(PQCLEAN_MLDSA65_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key) != 0)
     {
@@ -104,9 +93,7 @@ int main(void)
     }
 
 
-
     printf("SUCCESS: Key pair generated successfully.\n\n");
-
 
 
 
@@ -117,26 +104,24 @@ int main(void)
     printf("[2/4] Signing Message...\n\n");
 
 
-    size_t signature_length;
+    size_t siglen;
 
 
-
-    if(PQCLEAN_MLDSA44_CLEAN_crypto_sign_signature(
+    if(PQCLEAN_MLDSA65_CLEAN_crypto_sign_signature(
             signature,
-            &signature_length,
+            &siglen,
             message,
             sizeof(message),
             secret_key) != 0)
     {
 
-        printf("ERROR: Signature generation failed\n");
+        printf("ERROR: Signing failed\n");
 
 
         while(1)
             tight_loop_contents();
 
     }
-
 
 
     printf("SUCCESS: Message signed successfully.\n\n");
@@ -148,13 +133,14 @@ int main(void)
 
 
 
+
+
     printf("[3/4] Verifying Signature...\n\n");
 
 
-
-    if(PQCLEAN_MLDSA44_CLEAN_crypto_sign_verify(
+    if(PQCLEAN_MLDSA65_CLEAN_crypto_sign_verify(
             signature,
-            signature_length,
+            siglen,
             message,
             sizeof(message),
             public_key) != 0)
@@ -169,10 +155,7 @@ int main(void)
     }
 
 
-
     printf("SUCCESS: Signature verified successfully.\n\n");
-
-
 
 
 
@@ -190,14 +173,29 @@ int main(void)
 
 
 
-    printf("PASS: Signature is valid.\n");
+    if(PQCLEAN_MLDSA65_CLEAN_crypto_sign_verify(
+            signature,
+            siglen,
+            message,
+            sizeof(message),
+            public_key) == 0)
+    {
 
-    printf("ML-DSA-44 functional validation successful.\n");
+        printf("PASS: Signature is valid.\n");
+        printf("ML-DSA-65 functional validation successful.\n");
 
+    }
+
+    else
+    {
+
+        printf("FAIL: Signature is invalid.\n");
+        printf("ML-DSA-65 functional validation failed.\n");
+
+    }
 
 
     printf("=============================================\n\n");
-
 
 
 
@@ -220,13 +218,14 @@ int main(void)
 
 
 
+
+
     while(1)
     {
 
         tight_loop_contents();
 
     }
-
 
 
     return 0;

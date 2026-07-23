@@ -15,17 +15,17 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_MLDSA44_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_MLDSA65_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 static uint8_t secret_key[
-    PQCLEAN_MLDSA44_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_MLDSA65_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 static uint8_t signature[
-    PQCLEAN_MLDSA44_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLDSA65_CLEAN_CRYPTO_BYTES
 ];
 
 
@@ -197,6 +197,7 @@ void print_processor_info(void)
 
 
 
+
 static double calculate_stddev(
         benchmark_result_t *result)
 {
@@ -288,10 +289,11 @@ static void benchmark_operation(
 
 
 
+
         if(operation == 0)
         {
 
-            PQCLEAN_MLDSA44_CLEAN_crypto_sign_keypair(
+            PQCLEAN_MLDSA65_CLEAN_crypto_sign_keypair(
                 public_key,
                 secret_key
             );
@@ -305,7 +307,7 @@ static void benchmark_operation(
             size_t siglen;
 
 
-            PQCLEAN_MLDSA44_CLEAN_crypto_sign_signature(
+            PQCLEAN_MLDSA65_CLEAN_crypto_sign_signature(
                 signature,
                 &siglen,
                 message,
@@ -319,9 +321,9 @@ static void benchmark_operation(
         else
         {
 
-            PQCLEAN_MLDSA44_CLEAN_crypto_sign_verify(
+            PQCLEAN_MLDSA65_CLEAN_crypto_sign_verify(
                 signature,
-                PQCLEAN_MLDSA44_CLEAN_CRYPTO_BYTES,
+                PQCLEAN_MLDSA65_CLEAN_CRYPTO_BYTES,
                 message,
                 sizeof(message),
                 public_key
@@ -423,7 +425,8 @@ static void benchmark_total_sign()
 
 
 
-        PQCLEAN_MLDSA44_CLEAN_crypto_sign_keypair(
+
+        PQCLEAN_MLDSA65_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
@@ -433,7 +436,7 @@ static void benchmark_total_sign()
         size_t siglen;
 
 
-        PQCLEAN_MLDSA44_CLEAN_crypto_sign_signature(
+        PQCLEAN_MLDSA65_CLEAN_crypto_sign_signature(
             signature,
             &siglen,
             message,
@@ -443,7 +446,7 @@ static void benchmark_total_sign()
 
 
 
-        PQCLEAN_MLDSA44_CLEAN_crypto_sign_verify(
+        PQCLEAN_MLDSA65_CLEAN_crypto_sign_verify(
             signature,
             siglen,
             message,
@@ -501,6 +504,7 @@ static void benchmark_total_sign()
 
 
 
+
     print_result(
         "Total Sign",
         &result
@@ -525,7 +529,7 @@ void run_benchmark(void)
 
     printf("\n");
     printf("============================================================\n");
-    printf("              ML-DSA-44 Benchmark Results\n");
+    printf("              ML-DSA-65 Benchmark Results\n");
     printf("============================================================\n\n");
 
 
@@ -538,7 +542,7 @@ void run_benchmark(void)
     for(int i=0;i<WARMUP;i++)
     {
 
-        PQCLEAN_MLDSA44_CLEAN_crypto_sign_keypair(
+        PQCLEAN_MLDSA65_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
@@ -567,6 +571,7 @@ void run_benchmark(void)
 
 
 
+
     benchmark_operation(
         "Key Generation",
         0
@@ -589,6 +594,7 @@ void run_benchmark(void)
 
 
     benchmark_total_sign();
+
 
 
 
