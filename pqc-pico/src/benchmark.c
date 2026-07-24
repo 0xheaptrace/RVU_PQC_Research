@@ -9,23 +9,23 @@
 #include "api.h"
 
 
-#define ITERATIONS 10000
-#define WARMUP 100
+#define ITERATIONS 100
+#define WARMUP 3
 
 
 
 static uint8_t public_key[
-    PQCLEAN_MLDSA87_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_FALCON512_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 static uint8_t secret_key[
-    PQCLEAN_MLDSA87_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_FALCON512_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 static uint8_t signature[
-    PQCLEAN_MLDSA87_CLEAN_CRYPTO_BYTES
+    PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES
 ];
 
 
@@ -60,22 +60,23 @@ typedef struct
 
 
 
-
 /*
  * Enable RISC-V Hardware Cycle Counter
  */
 
 static inline void enable_cycle_counter()
 {
+
     uint32_t value = 0;
+
 
     asm volatile(
         "csrw mcountinhibit, %0"
         :
         : "r"(value)
     );
-}
 
+}
 
 
 
@@ -120,7 +121,6 @@ static inline uint64_t read_cycle_counter()
     return ((uint64_t)hi1 << 32) | lo;
 
 }
-
 
 
 
@@ -193,7 +193,6 @@ void print_processor_info(void)
 
 
 
-
 static double calculate_stddev(
         benchmark_result_t *result)
 {
@@ -203,7 +202,6 @@ static double calculate_stddev(
     );
 
 }
-
 
 
 
@@ -248,8 +246,6 @@ static void print_result(
 
 
 
-
-
 static void benchmark_operation(
         const char *name,
         int operation)
@@ -261,14 +257,12 @@ static void benchmark_operation(
     result.min_time = 0xffffffff;
 
 
-
     double mean = 0;
 
 
 
     for(int i = 0; i < ITERATIONS; i++)
     {
-
 
         uint32_t start_time =
             time_us_32();
@@ -279,11 +273,10 @@ static void benchmark_operation(
 
 
 
-
         if(operation == 0)
         {
 
-            PQCLEAN_MLDSA87_CLEAN_crypto_sign_keypair(
+            PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
                 public_key,
                 secret_key
             );
@@ -297,7 +290,7 @@ static void benchmark_operation(
             size_t siglen;
 
 
-            PQCLEAN_MLDSA87_CLEAN_crypto_sign_signature(
+            PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(
                 signature,
                 &siglen,
                 message,
@@ -311,16 +304,19 @@ static void benchmark_operation(
         else
         {
 
-            PQCLEAN_MLDSA87_CLEAN_crypto_sign_verify(
+            size_t siglen =
+                PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES;
+
+
+            PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
                 signature,
-                sizeof(signature),
+                siglen,
                 message,
                 sizeof(message),
                 public_key
             );
 
         }
-
 
 
 
@@ -381,9 +377,6 @@ static void benchmark_operation(
 
 
 
-
-
-
 static void benchmark_total_sign()
 {
 
@@ -393,14 +386,12 @@ static void benchmark_total_sign()
     result.min_time = 0xffffffff;
 
 
-
     double mean = 0;
 
 
 
     for(int i = 0; i < ITERATIONS; i++)
     {
-
 
         uint32_t start_time =
             time_us_32();
@@ -411,18 +402,16 @@ static void benchmark_total_sign()
 
 
 
-
-        PQCLEAN_MLDSA87_CLEAN_crypto_sign_keypair(
+        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
 
 
-
         size_t siglen;
 
 
-        PQCLEAN_MLDSA87_CLEAN_crypto_sign_signature(
+        PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(
             signature,
             &siglen,
             message,
@@ -431,15 +420,13 @@ static void benchmark_total_sign()
         );
 
 
-
-        PQCLEAN_MLDSA87_CLEAN_crypto_sign_verify(
+        PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
             signature,
             siglen,
             message,
             sizeof(message),
             public_key
         );
-
 
 
 
@@ -500,9 +487,6 @@ static void benchmark_total_sign()
 
 
 
-
-
-
 void run_benchmark(void)
 {
 
@@ -512,7 +496,7 @@ void run_benchmark(void)
 
     printf("\n");
     printf("============================================================\n");
-    printf("              ML-DSA-87 Benchmark Results\n");
+    printf("              Falcon-512 Benchmark Results\n");
     printf("============================================================\n\n");
 
 
@@ -525,7 +509,7 @@ void run_benchmark(void)
     for(int i=0;i<WARMUP;i++)
     {
 
-        PQCLEAN_MLDSA87_CLEAN_crypto_sign_keypair(
+        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
@@ -552,12 +536,10 @@ void run_benchmark(void)
 
 
 
-
     benchmark_operation(
         "Key Generation",
         0
     );
-
 
 
     benchmark_operation(
@@ -566,16 +548,13 @@ void run_benchmark(void)
     );
 
 
-
     benchmark_operation(
         "Verification",
         2
     );
 
 
-
     benchmark_total_sign();
-
 
 
 

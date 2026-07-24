@@ -11,17 +11,17 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_MLDSA87_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_FALCON512_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 static uint8_t secret_key[
-    PQCLEAN_MLDSA87_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_FALCON512_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 static uint8_t signature[
-    PQCLEAN_MLDSA87_CLEAN_CRYPTO_BYTES
+    PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES
 ];
 
 
@@ -39,20 +39,17 @@ static uint8_t message[32] =
 
 
 
-
-
 static void print_banner(void)
 {
 
     printf("\n");
     printf("============================================================\n");
-    printf("            ML-DSA-87 Functional Validation\n");
+    printf("         Falcon-512 Functional Validation\n");
     printf("         Raspberry Pi Pico 2 W (RP2350)\n");
     printf("         PQClean Clean Implementation\n");
     printf("============================================================\n\n");
 
 }
-
 
 
 
@@ -79,11 +76,10 @@ int main(void)
 
 
 
-    printf("[1/4] Generating ML-DSA-87 Key Pair...\n\n");
+    printf("[1/4] Generating Falcon-512 Key Pair...\n\n");
 
 
-
-    if(PQCLEAN_MLDSA87_CLEAN_crypto_sign_keypair(
+    if(PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key) != 0)
     {
@@ -97,11 +93,7 @@ int main(void)
     }
 
 
-
     printf("SUCCESS: Key pair generated successfully.\n\n");
-
-
-
 
 
 
@@ -110,13 +102,12 @@ int main(void)
     printf("[2/4] Signing Message...\n\n");
 
 
-    size_t signature_length;
+    size_t siglen;
 
 
-
-    if(PQCLEAN_MLDSA87_CLEAN_crypto_sign_signature(
+    if(PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(
             signature,
-            &signature_length,
+            &siglen,
             message,
             sizeof(message),
             secret_key) != 0)
@@ -131,11 +122,7 @@ int main(void)
     }
 
 
-
     printf("SUCCESS: Message signed successfully.\n\n");
-
-
-
 
 
 
@@ -145,10 +132,9 @@ int main(void)
     printf("[3/4] Verifying Signature...\n\n");
 
 
-
-    if(PQCLEAN_MLDSA87_CLEAN_crypto_sign_verify(
+    if(PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
             signature,
-            signature_length,
+            siglen,
             message,
             sizeof(message),
             public_key) != 0)
@@ -163,11 +149,7 @@ int main(void)
     }
 
 
-
     printf("SUCCESS: Signature verified successfully.\n\n");
-
-
-
 
 
 
@@ -184,16 +166,16 @@ int main(void)
 
 
 
-    if(PQCLEAN_MLDSA87_CLEAN_crypto_sign_verify(
+    if(PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
             signature,
-            signature_length,
+            siglen,
             message,
             sizeof(message),
             public_key) == 0)
     {
 
         printf("PASS: Signature is valid.\n");
-        printf("ML-DSA-87 functional validation successful.\n");
+        printf("Falcon-512 functional validation successful.\n");
 
     }
 
@@ -201,25 +183,15 @@ int main(void)
     {
 
         printf("FAIL: Signature is invalid.\n");
-        printf("ML-DSA-87 functional validation failed.\n");
+        printf("Falcon-512 functional validation failed.\n");
 
     }
-
 
 
     printf("=============================================\n\n");
 
 
 
-
-
-
-
-
-    /*
-        Print hardware information
-        and run benchmark
-    */
 
 
     print_processor_info();
@@ -237,7 +209,6 @@ int main(void)
         tight_loop_contents();
 
     }
-
 
 
     return 0;
