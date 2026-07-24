@@ -15,17 +15,17 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_FALCON512_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_FALCON1024_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 static uint8_t secret_key[
-    PQCLEAN_FALCON512_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_FALCON1024_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 static uint8_t signature[
-    PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES
+    PQCLEAN_FALCON1024_CLEAN_CRYPTO_BYTES
 ];
 
 
@@ -276,7 +276,7 @@ static void benchmark_operation(
         if(operation == 0)
         {
 
-            PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
+            PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(
                 public_key,
                 secret_key
             );
@@ -290,7 +290,7 @@ static void benchmark_operation(
             size_t siglen;
 
 
-            PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(
+            PQCLEAN_FALCON1024_CLEAN_crypto_sign_signature(
                 signature,
                 &siglen,
                 message,
@@ -305,10 +305,10 @@ static void benchmark_operation(
         {
 
             size_t siglen =
-                PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES;
+                PQCLEAN_FALCON1024_CLEAN_CRYPTO_BYTES;
 
 
-            PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
+            PQCLEAN_FALCON1024_CLEAN_crypto_sign_verify(
                 signature,
                 siglen,
                 message,
@@ -402,7 +402,7 @@ static void benchmark_total_sign()
 
 
 
-        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
+        PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
@@ -411,7 +411,7 @@ static void benchmark_total_sign()
         size_t siglen;
 
 
-        PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(
+        PQCLEAN_FALCON1024_CLEAN_crypto_sign_signature(
             signature,
             &siglen,
             message,
@@ -420,7 +420,7 @@ static void benchmark_total_sign()
         );
 
 
-        PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
+        PQCLEAN_FALCON1024_CLEAN_crypto_sign_verify(
             signature,
             siglen,
             message,
@@ -496,7 +496,7 @@ void run_benchmark(void)
 
     printf("\n");
     printf("============================================================\n");
-    printf("              Falcon-512 Benchmark Results\n");
+    printf("              Falcon-1024 Benchmark Results\n");
     printf("============================================================\n\n");
 
 
@@ -509,7 +509,7 @@ void run_benchmark(void)
     for(int i=0;i<WARMUP;i++)
     {
 
-        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
+        PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );

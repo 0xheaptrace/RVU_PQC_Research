@@ -11,17 +11,17 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_FALCON512_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_FALCON1024_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 static uint8_t secret_key[
-    PQCLEAN_FALCON512_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_FALCON1024_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 static uint8_t signature[
-    PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES
+    PQCLEAN_FALCON1024_CLEAN_CRYPTO_BYTES
 ];
 
 
@@ -44,7 +44,7 @@ static void print_banner(void)
 
     printf("\n");
     printf("============================================================\n");
-    printf("         Falcon-512 Functional Validation\n");
+    printf("         Falcon-1024 Functional Validation\n");
     printf("         Raspberry Pi Pico 2 W (RP2350)\n");
     printf("         PQClean Clean Implementation\n");
     printf("============================================================\n\n");
@@ -76,10 +76,10 @@ int main(void)
 
 
 
-    printf("[1/4] Generating Falcon-512 Key Pair...\n\n");
+    printf("[1/4] Generating Falcon-1024 Key Pair...\n\n");
 
 
-    if(PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
+    if(PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key) != 0)
     {
@@ -105,7 +105,7 @@ int main(void)
     size_t siglen;
 
 
-    if(PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(
+    if(PQCLEAN_FALCON1024_CLEAN_crypto_sign_signature(
             signature,
             &siglen,
             message,
@@ -132,7 +132,7 @@ int main(void)
     printf("[3/4] Verifying Signature...\n\n");
 
 
-    if(PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
+    if(PQCLEAN_FALCON1024_CLEAN_crypto_sign_verify(
             signature,
             siglen,
             message,
@@ -166,7 +166,7 @@ int main(void)
 
 
 
-    if(PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
+    if(PQCLEAN_FALCON1024_CLEAN_crypto_sign_verify(
             signature,
             siglen,
             message,
@@ -175,7 +175,7 @@ int main(void)
     {
 
         printf("PASS: Signature is valid.\n");
-        printf("Falcon-512 functional validation successful.\n");
+        printf("Falcon-1024 functional validation successful.\n");
 
     }
 
@@ -183,7 +183,7 @@ int main(void)
     {
 
         printf("FAIL: Signature is invalid.\n");
-        printf("Falcon-512 functional validation failed.\n");
+        printf("Falcon-1024 functional validation failed.\n");
 
     }
 
