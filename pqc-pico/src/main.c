@@ -10,19 +10,24 @@
 
 
 
+
 static uint8_t public_key[
-    PQCLEAN_FALCON1024_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
+
 
 
 static uint8_t secret_key[
-    PQCLEAN_FALCON1024_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
+
 
 
 static uint8_t signature[
-    PQCLEAN_FALCON1024_CLEAN_CRYPTO_BYTES
+    PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_CRYPTO_BYTES
 ];
+
+
 
 
 static uint8_t message[32] =
@@ -39,17 +44,21 @@ static uint8_t message[32] =
 
 
 
+
+
 static void print_banner(void)
 {
 
     printf("\n");
     printf("============================================================\n");
-    printf("         Falcon-1024 Functional Validation\n");
-    printf("         Raspberry Pi Pico 2 W (RP2350)\n");
-    printf("         PQClean Clean Implementation\n");
+    printf("      SPHINCS+-SHA2-128s-simple Functional Validation\n");
+    printf("      Raspberry Pi Pico 2 W (RP2350)\n");
+    printf("      PQClean Clean Implementation\n");
     printf("============================================================\n\n");
 
 }
+
+
 
 
 
@@ -61,13 +70,16 @@ int main(void)
     stdio_init_all();
 
 
+
     while(!stdio_usb_connected())
     {
         sleep_ms(100);
     }
 
 
+
     sleep_ms(1000);
+
 
 
 
@@ -76,12 +88,17 @@ int main(void)
 
 
 
-    printf("[1/4] Generating Falcon-1024 Key Pair...\n\n");
+
+    printf("[1/4] Generating SPHINCS+-SHA2-128s Key Pair...\n\n");
 
 
-    if(PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(
+
+    if(
+        PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_keypair(
             public_key,
-            secret_key) != 0)
+            secret_key
+        ) != 0
+    )
     {
 
         printf("ERROR: Key generation failed\n");
@@ -99,18 +116,27 @@ int main(void)
 
 
 
+
+
+
+
     printf("[2/4] Signing Message...\n\n");
+
 
 
     size_t siglen;
 
 
-    if(PQCLEAN_FALCON1024_CLEAN_crypto_sign_signature(
+
+    if(
+        PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_signature(
             signature,
             &siglen,
             message,
             sizeof(message),
-            secret_key) != 0)
+            secret_key
+        ) != 0
+    )
     {
 
         printf("ERROR: Signature generation failed\n");
@@ -129,15 +155,22 @@ int main(void)
 
 
 
+
+
+
     printf("[3/4] Verifying Signature...\n\n");
 
 
-    if(PQCLEAN_FALCON1024_CLEAN_crypto_sign_verify(
+
+    if(
+        PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_verify(
             signature,
             siglen,
             message,
             sizeof(message),
-            public_key) != 0)
+            public_key
+        ) != 0
+    )
     {
 
         printf("ERROR: Signature verification failed\n");
@@ -156,7 +189,12 @@ int main(void)
 
 
 
+
+
+
     printf("[4/4] Verification Result...\n\n");
+
+
 
 
 
@@ -166,16 +204,21 @@ int main(void)
 
 
 
-    if(PQCLEAN_FALCON1024_CLEAN_crypto_sign_verify(
+
+
+    if(
+        PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_verify(
             signature,
             siglen,
             message,
             sizeof(message),
-            public_key) == 0)
+            public_key
+        ) == 0
+    )
     {
 
         printf("PASS: Signature is valid.\n");
-        printf("Falcon-1024 functional validation successful.\n");
+        printf("SPHINCS+-SHA2-128s functional validation successful.\n");
 
     }
 
@@ -183,9 +226,10 @@ int main(void)
     {
 
         printf("FAIL: Signature is invalid.\n");
-        printf("Falcon-1024 functional validation failed.\n");
+        printf("SPHINCS+-SHA2-128s functional validation failed.\n");
 
     }
+
 
 
     printf("=============================================\n\n");
@@ -194,10 +238,15 @@ int main(void)
 
 
 
+
+
     print_processor_info();
 
 
+
     run_benchmark();
+
+
 
 
 
@@ -209,6 +258,7 @@ int main(void)
         tight_loop_contents();
 
     }
+
 
 
     return 0;
