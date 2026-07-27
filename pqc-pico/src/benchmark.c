@@ -10,24 +10,24 @@
 
 
 
-#define ITERATIONS 10
+#define ITERATIONS 1
 #define WARMUP 1
 
 
 
 
 static uint8_t public_key[
-    PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 static uint8_t secret_key[
-    PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 static uint8_t signature[
-    PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_BYTES
+    PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_CRYPTO_BYTES
 ];
 
 
@@ -298,7 +298,7 @@ static void benchmark_operation(
         if(operation == 0)
         {
 
-            PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_keypair(
+            PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_keypair(
                 public_key,
                 secret_key
             );
@@ -312,7 +312,7 @@ static void benchmark_operation(
             size_t siglen;
 
 
-            PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_signature(
+            PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_signature(
                 signature,
                 &siglen,
                 message,
@@ -326,9 +326,9 @@ static void benchmark_operation(
         else
         {
 
-            PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_verify(
+            PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_verify(
                 signature,
-                PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_BYTES,
+                PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_CRYPTO_BYTES,
                 message,
                 sizeof(message),
                 public_key
@@ -440,7 +440,7 @@ static void benchmark_total_sign()
 
 
 
-        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_keypair(
+        PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
@@ -453,7 +453,7 @@ static void benchmark_total_sign()
 
 
 
-        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_signature(
+        PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_signature(
             signature,
             &siglen,
             message,
@@ -465,7 +465,7 @@ static void benchmark_total_sign()
 
 
 
-        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_verify(
+        PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_verify(
             signature,
             siglen,
             message,
@@ -561,7 +561,7 @@ void run_benchmark(void)
 
     printf("\n");
     printf("============================================================\n");
-    printf("       SPHINCS+-SHA2-192s Benchmark Results\n");
+    printf("       SPHINCS+-SHA2-256s Benchmark Results\n");
     printf("============================================================\n\n");
 
 
@@ -578,7 +578,7 @@ void run_benchmark(void)
     for(int i=0;i<WARMUP;i++)
     {
 
-        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_keypair(
+        PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
