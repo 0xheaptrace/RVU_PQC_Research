@@ -4,6 +4,7 @@ include(pico_sdk_import.cmake)
 
 project(pqc_pico C CXX ASM)
 
+
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
@@ -15,35 +16,38 @@ pico_sdk_init()
 add_executable(pqc_pico
 
     src/main.c
-    src/randombytes.c
     src/benchmark.c
+    src/randombytes.c
+
 
 
     # =====================================================
-    # SPHINCS+-SHA2-256s-simple Clean Implementation
+    # HQC-128 Clean Implementation
     # =====================================================
 
-    ../PQClean/crypto_sign/sphincs-sha2-256s-simple/clean/address.c
+    ../PQClean/crypto_kem/hqc-128/clean/kem.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-256s-simple/clean/context_sha2.c
+    ../PQClean/crypto_kem/hqc-128/clean/hqc.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-256s-simple/clean/fors.c
+    ../PQClean/crypto_kem/hqc-128/clean/code.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-256s-simple/clean/hash_sha2.c
+    ../PQClean/crypto_kem/hqc-128/clean/fft.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-256s-simple/clean/merkle.c
+    ../PQClean/crypto_kem/hqc-128/clean/gf.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-256s-simple/clean/sign.c
+    ../PQClean/crypto_kem/hqc-128/clean/gf2x.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-256s-simple/clean/thash_sha2_simple.c
+    ../PQClean/crypto_kem/hqc-128/clean/parsing.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-256s-simple/clean/utils.c
+    ../PQClean/crypto_kem/hqc-128/clean/reed_muller.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-256s-simple/clean/utilsx1.c
+    ../PQClean/crypto_kem/hqc-128/clean/reed_solomon.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-256s-simple/clean/wots.c
+    ../PQClean/crypto_kem/hqc-128/clean/vector.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-256s-simple/clean/wotsx1.c
+    ../PQClean/crypto_kem/hqc-128/clean/shake_ds.c
+
+    ../PQClean/crypto_kem/hqc-128/clean/shake_prng.c
 
 
 
@@ -55,6 +59,8 @@ add_executable(pqc_pico
 
     ../PQClean/common/sha2.c
 
+    ../PQClean/common/aes.c
+
 )
 
 
@@ -63,11 +69,14 @@ add_executable(pqc_pico
 
 target_include_directories(pqc_pico PRIVATE
 
+
     src
+
 
     ../PQClean/common
 
-    ../PQClean/crypto_sign/sphincs-sha2-256s-simple/clean
+
+    ../PQClean/crypto_kem/hqc-128/clean
 
 )
 
@@ -89,6 +98,10 @@ target_link_libraries(pqc_pico
 
 
 
+# =====================================================
+# USB Serial
+# =====================================================
+
 pico_enable_stdio_usb(pqc_pico 1)
 
 pico_enable_stdio_uart(pqc_pico 0)
@@ -96,5 +109,9 @@ pico_enable_stdio_uart(pqc_pico 0)
 
 
 
+
+# =====================================================
+# RP2350 Output
+# =====================================================
 
 pico_add_extra_outputs(pqc_pico)

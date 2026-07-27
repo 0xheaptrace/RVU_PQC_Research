@@ -12,35 +12,34 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_HQC128_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 
 static uint8_t secret_key[
-    PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_HQC128_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 
-static uint8_t signature[
-    PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_CRYPTO_BYTES
+static uint8_t ciphertext[
+    PQCLEAN_HQC128_CLEAN_CRYPTO_CIPHERTEXTBYTES
 ];
 
 
 
+static uint8_t shared_secret_enc[
+    PQCLEAN_HQC128_CLEAN_CRYPTO_BYTES
+];
 
-static uint8_t message[32] =
-{
-    0x01,0x02,0x03,0x04,
-    0x05,0x06,0x07,0x08,
-    0x09,0x0A,0x0B,0x0C,
-    0x0D,0x0E,0x0F,0x10,
-    0x11,0x12,0x13,0x14,
-    0x15,0x16,0x17,0x18,
-    0x19,0x1A,0x1B,0x1C,
-    0x1D,0x1E,0x1F,0x20
-};
+
+
+static uint8_t shared_secret_dec[
+    PQCLEAN_HQC128_CLEAN_CRYPTO_BYTES
+];
+
+
 
 
 
@@ -51,12 +50,14 @@ static void print_banner(void)
 
     printf("\n");
     printf("============================================================\n");
-    printf("      SPHINCS+-SHA2-256s-simple Functional Validation\n");
-    printf("      Raspberry Pi Pico 2 W (RP2350)\n");
-    printf("      PQClean Clean Implementation\n");
+    printf("             HQC-128 Functional Validation\n");
+    printf("             Raspberry Pi Pico 2 W (RP2350)\n");
+    printf("             PQClean Clean Implementation\n");
     printf("============================================================\n\n");
 
 }
+
+
 
 
 
@@ -89,12 +90,15 @@ int main(void)
 
 
 
-    printf("[1/4] Generating SPHINCS+-SHA2-256s Key Pair...\n\n");
+
+
+
+    printf("[1/4] Generating HQC-128 Key Pair...\n\n");
 
 
 
     if(
-        PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_keypair(
+        PQCLEAN_HQC128_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key
         ) != 0
@@ -120,60 +124,20 @@ int main(void)
 
 
 
-    printf("[2/4] Signing Message...\n\n");
-
-
-
-    size_t siglen;
+    printf("[2/4] Encapsulating Shared Secret...\n\n");
 
 
 
     if(
-        PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_signature(
-            signature,
-            &siglen,
-            message,
-            sizeof(message),
-            secret_key
-        ) != 0
-    )
-    {
-
-        printf("ERROR: Signature generation failed\n");
-
-
-        while(1)
-            tight_loop_contents();
-
-    }
-
-
-    printf("SUCCESS: Message signed successfully.\n\n");
-
-
-
-
-
-
-
-
-
-    printf("[3/4] Verifying Signature...\n\n");
-
-
-
-    if(
-        PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_verify(
-            signature,
-            siglen,
-            message,
-            sizeof(message),
+        PQCLEAN_HQC128_CLEAN_crypto_kem_enc(
+            ciphertext,
+            shared_secret_enc,
             public_key
         ) != 0
     )
     {
 
-        printf("ERROR: Signature verification failed\n");
+        printf("ERROR: Encapsulation failed\n");
 
 
         while(1)
@@ -182,7 +146,39 @@ int main(void)
     }
 
 
-    printf("SUCCESS: Signature verified successfully.\n\n");
+    printf("SUCCESS: Shared secret encapsulated successfully.\n\n");
+
+
+
+
+
+
+
+
+
+    printf("[3/4] Decapsulating Shared Secret...\n\n");
+
+
+
+    if(
+        PQCLEAN_HQC128_CLEAN_crypto_kem_dec(
+            shared_secret_dec,
+            ciphertext,
+            secret_key
+        ) != 0
+    )
+    {
+
+        printf("ERROR: Decapsulation failed\n");
+
+
+        while(1)
+            tight_loop_contents();
+
+    }
+
+
+    printf("SUCCESS: Shared secret decapsulated successfully.\n\n");
 
 
 
@@ -206,27 +202,26 @@ int main(void)
 
 
 
+
     if(
-        PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_verify(
-            signature,
-            siglen,
-            message,
-            sizeof(message),
-            public_key
+        memcmp(
+            shared_secret_enc,
+            shared_secret_dec,
+            PQCLEAN_HQC128_CLEAN_CRYPTO_BYTES
         ) == 0
     )
     {
 
-        printf("PASS: Signature is valid.\n");
-        printf("SPHINCS+-SHA2-256s functional validation successful.\n");
+        printf("PASS: Shared secrets match.\n");
+        printf("HQC-128 functional validation successful.\n");
 
     }
 
     else
     {
 
-        printf("FAIL: Signature is invalid.\n");
-        printf("SPHINCS+-SHA2-256s functional validation failed.\n");
+        printf("FAIL: Shared secrets do not match.\n");
+        printf("HQC-128 functional validation failed.\n");
 
     }
 
@@ -252,12 +247,16 @@ int main(void)
 
 
 
+
+
     while(1)
     {
 
         tight_loop_contents();
 
     }
+
+
 
 
 

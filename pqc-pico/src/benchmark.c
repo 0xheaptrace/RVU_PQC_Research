@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <math.h>
+#include <string.h>
 
 #include "pico/stdlib.h"
 
@@ -9,40 +10,34 @@
 #include "api.h"
 
 
-
-#define ITERATIONS 1
-#define WARMUP 1
-
+#define ITERATIONS 100
+#define WARMUP 3
 
 
 
 static uint8_t public_key[
-    PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_HQC128_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 static uint8_t secret_key[
-    PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_HQC128_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
-static uint8_t signature[
-    PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_CRYPTO_BYTES
+static uint8_t ciphertext[
+    PQCLEAN_HQC128_CLEAN_CRYPTO_CIPHERTEXTBYTES
 ];
 
 
+static uint8_t shared_secret_enc[
+    PQCLEAN_HQC128_CLEAN_CRYPTO_BYTES
+];
 
-static uint8_t message[32] =
-{
-    0x01,0x02,0x03,0x04,
-    0x05,0x06,0x07,0x08,
-    0x09,0x0A,0x0B,0x0C,
-    0x0D,0x0E,0x0F,0x10,
-    0x11,0x12,0x13,0x14,
-    0x15,0x16,0x17,0x18,
-    0x19,0x1A,0x1B,0x1C,
-    0x1D,0x1E,0x1F,0x20
-};
+
+static uint8_t shared_secret_dec[
+    PQCLEAN_HQC128_CLEAN_CRYPTO_BYTES
+];
 
 
 
@@ -61,7 +56,6 @@ typedef struct
     double variance;
 
 } benchmark_result_t;
-
 
 
 
@@ -145,34 +139,52 @@ void print_processor_info(void)
 
 
 #ifdef __riscv_xlen
+
     printf("XLEN         : %d-bit\n",
            __riscv_xlen);
+
 #endif
+
 
 
 #ifdef __riscv_mul
+
     printf("Extension    : M (Multiply)\n");
+
 #endif
+
 
 
 #ifdef __riscv_atomic
+
     printf("Extension    : A (Atomic)\n");
+
 #endif
+
 
 
 #ifdef __riscv_compressed
+
     printf("Extension    : C (Compressed)\n");
+
 #endif
+
 
 
 #ifdef __riscv_zicsr
+
     printf("Extension    : Zicsr\n");
+
 #endif
+
 
 
 #ifdef __riscv_zifencei
+
     printf("Extension    : Zifencei\n");
+
 #endif
+
 
 
     printf("Core         : Hazard3 (RP2350)\n");
@@ -180,13 +192,17 @@ void print_processor_info(void)
 
 #else
 
+
     printf("Architecture : ARM\n");
+
 
 #endif
 
 
+
     printf("Compiler     : %s\n",
            __VERSION__);
+
 
 
     printf("============================================================\n\n");
@@ -232,7 +248,6 @@ static void print_result(
 
 
 
-
     printf(
     "| %-14s | %11" PRIu64 " | %11.3f | %11" PRIu64 " | %11u | %11u | %10.2f |\n",
 
@@ -253,30 +268,17 @@ static void print_result(
     );
 
 }
-
-
-
-
-
-
-
-
-
 static void benchmark_operation(
         const char *name,
         int operation)
 {
 
-
     benchmark_result_t result = {0};
-
 
     result.min_time = 0xffffffff;
 
 
-
     double mean = 0;
-
 
 
 
@@ -294,11 +296,10 @@ static void benchmark_operation(
 
 
 
-
         if(operation == 0)
         {
 
-            PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_keypair(
+            PQCLEAN_HQC128_CLEAN_crypto_kem_keypair(
                 public_key,
                 secret_key
             );
@@ -306,36 +307,30 @@ static void benchmark_operation(
         }
 
 
+
         else if(operation == 1)
         {
 
-            size_t siglen;
-
-
-            PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_signature(
-                signature,
-                &siglen,
-                message,
-                sizeof(message),
-                secret_key
-            );
-
-        }
-
-
-        else
-        {
-
-            PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_verify(
-                signature,
-                PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_CRYPTO_BYTES,
-                message,
-                sizeof(message),
+            PQCLEAN_HQC128_CLEAN_crypto_kem_enc(
+                ciphertext,
+                shared_secret_enc,
                 public_key
             );
 
         }
 
+
+
+        else
+        {
+
+            PQCLEAN_HQC128_CLEAN_crypto_kem_dec(
+                shared_secret_dec,
+                ciphertext,
+                secret_key
+            );
+
+        }
 
 
 
@@ -365,12 +360,17 @@ static void benchmark_operation(
 
 
 
+
         if(elapsed_time < result.min_time)
+
             result.min_time = elapsed_time;
 
 
+
         if(elapsed_time > result.max_time)
+
             result.max_time = elapsed_time;
+
 
 
 
@@ -378,6 +378,7 @@ static void benchmark_operation(
 
         double delta =
             elapsed_time - mean;
+
 
 
         mean += delta/(i+1);
@@ -388,8 +389,8 @@ static void benchmark_operation(
             delta*(elapsed_time-mean);
 
 
-    }
 
+    }
 
 
 
@@ -408,11 +409,10 @@ static void benchmark_operation(
 
 
 
-static void benchmark_total_sign()
+static void benchmark_total_kem()
 {
 
-
-    benchmark_result_t result={0};
+    benchmark_result_t result = {0};
 
 
     result.min_time = 0xffffffff;
@@ -420,6 +420,7 @@ static void benchmark_total_sign()
 
 
     double mean = 0;
+
 
 
 
@@ -440,7 +441,8 @@ static void benchmark_total_sign()
 
 
 
-        PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_keypair(
+
+        PQCLEAN_HQC128_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key
         );
@@ -448,28 +450,10 @@ static void benchmark_total_sign()
 
 
 
-        size_t siglen;
 
-
-
-
-        PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_signature(
-            signature,
-            &siglen,
-            message,
-            sizeof(message),
-            secret_key
-        );
-
-
-
-
-
-        PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_verify(
-            signature,
-            siglen,
-            message,
-            sizeof(message),
+        PQCLEAN_HQC128_CLEAN_crypto_kem_enc(
+            ciphertext,
+            shared_secret_enc,
             public_key
         );
 
@@ -478,8 +462,21 @@ static void benchmark_total_sign()
 
 
 
+        PQCLEAN_HQC128_CLEAN_crypto_kem_dec(
+            shared_secret_dec,
+            ciphertext,
+            secret_key
+        );
+
+
+
+
+
+
+
         uint64_t end_cycles =
             read_cycle_counter();
+
 
 
 
@@ -496,6 +493,7 @@ static void benchmark_total_sign()
 
 
 
+
         result.total_time += elapsed_time;
 
         result.total_cycles += elapsed_cycles;
@@ -504,11 +502,15 @@ static void benchmark_total_sign()
 
 
 
+
         if(elapsed_time < result.min_time)
+
             result.min_time = elapsed_time;
 
 
+
         if(elapsed_time > result.max_time)
+
             result.max_time = elapsed_time;
 
 
@@ -520,12 +522,14 @@ static void benchmark_total_sign()
             elapsed_time - mean;
 
 
+
         mean += delta/(i+1);
 
 
 
         result.variance +=
             delta*(elapsed_time-mean);
+
 
 
     }
@@ -535,7 +539,7 @@ static void benchmark_total_sign()
 
 
     print_result(
-        "Total Sign",
+        "Total KEM",
         &result
     );
 
@@ -553,16 +557,21 @@ static void benchmark_total_sign()
 void run_benchmark(void)
 {
 
-
     enable_cycle_counter();
 
 
 
 
+
     printf("\n");
+
     printf("============================================================\n");
-    printf("       SPHINCS+-SHA2-256s Benchmark Results\n");
+
+    printf("              HQC-128 Benchmark Results\n");
+
     printf("============================================================\n\n");
+
+
 
 
 
@@ -575,10 +584,12 @@ void run_benchmark(void)
 
 
 
-    for(int i=0;i<WARMUP;i++)
+
+
+    for(int i = 0; i < WARMUP; i++)
     {
 
-        PQCLEAN_SPHINCSSHA2256SSIMPLE_CLEAN_crypto_sign_keypair(
+        PQCLEAN_HQC128_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key
         );
@@ -589,7 +600,11 @@ void run_benchmark(void)
 
 
 
+
+
     printf("Warmup complete\n\n");
+
+
 
 
 
@@ -614,6 +629,8 @@ void run_benchmark(void)
 
 
 
+
+
     benchmark_operation(
         "Key Generation",
         0
@@ -621,21 +638,31 @@ void run_benchmark(void)
 
 
 
+
+
     benchmark_operation(
-        "Signing",
+        "Encapsulation",
         1
     );
 
 
 
+
+
     benchmark_operation(
-        "Verification",
+        "Decapsulation",
         2
     );
 
 
 
-    benchmark_total_sign();
+
+
+
+
+    benchmark_total_kem();
+
+
 
 
 
@@ -643,6 +670,9 @@ void run_benchmark(void)
 
 
     printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
+
+
+
 
 
     printf("\nBenchmark completed.\n");
