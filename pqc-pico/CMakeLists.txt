@@ -19,6 +19,7 @@ add_compile_definitions(PICO_HEAP_SIZE=0x8000)
 
 
 
+
 add_executable(pqc_pico
 
     src/main.c
@@ -28,30 +29,30 @@ add_executable(pqc_pico
 
 
     # =====================================================
-    # PQClean SPHINCS+-SHA2-128s-simple Clean
+    # PQClean SPHINCS+-SHA2-192s-simple Clean
     # =====================================================
 
-    ../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/address.c
+    ../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/address.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/context_sha2.c
+    ../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/context_sha2.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/fors.c
+    ../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/fors.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/hash_sha2.c
+    ../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/hash_sha2.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/merkle.c
+    ../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/merkle.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/sign.c
+    ../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/sign.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/thash_sha2_simple.c
+    ../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/thash_sha2_simple.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/utils.c
+    ../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/utils.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/utilsx1.c
+    ../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/utilsx1.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/wots.c
+    ../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/wots.c
 
-    ../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/wotsx1.c
+    ../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/wotsx1.c
 
 
 
@@ -78,7 +79,7 @@ target_include_directories(pqc_pico PRIVATE
     ../PQClean/common
 
 
-    ../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean
+    ../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean
 
 )
 
@@ -87,7 +88,6 @@ target_include_directories(pqc_pico PRIVATE
 
 
 target_link_libraries(pqc_pico
-
 
     pico_stdlib
 

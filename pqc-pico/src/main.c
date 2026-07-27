@@ -12,19 +12,19 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 
 static uint8_t secret_key[
-    PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 
 static uint8_t signature[
-    PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_CRYPTO_BYTES
+    PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_BYTES
 ];
 
 
@@ -51,7 +51,7 @@ static void print_banner(void)
 
     printf("\n");
     printf("============================================================\n");
-    printf("      SPHINCS+-SHA2-128s-simple Functional Validation\n");
+    printf("      SPHINCS+-SHA2-192s-simple Functional Validation\n");
     printf("      Raspberry Pi Pico 2 W (RP2350)\n");
     printf("      PQClean Clean Implementation\n");
     printf("============================================================\n\n");
@@ -89,12 +89,12 @@ int main(void)
 
 
 
-    printf("[1/4] Generating SPHINCS+-SHA2-128s Key Pair...\n\n");
+    printf("[1/4] Generating SPHINCS+-SHA2-192s Key Pair...\n\n");
 
 
 
     if(
-        PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_keypair(
+        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         ) != 0
@@ -129,7 +129,7 @@ int main(void)
 
 
     if(
-        PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_signature(
+        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_signature(
             signature,
             &siglen,
             message,
@@ -163,7 +163,7 @@ int main(void)
 
 
     if(
-        PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_verify(
+        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_verify(
             signature,
             siglen,
             message,
@@ -207,7 +207,7 @@ int main(void)
 
 
     if(
-        PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_verify(
+        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_verify(
             signature,
             siglen,
             message,
@@ -218,7 +218,7 @@ int main(void)
     {
 
         printf("PASS: Signature is valid.\n");
-        printf("SPHINCS+-SHA2-128s functional validation successful.\n");
+        printf("SPHINCS+-SHA2-192s functional validation successful.\n");
 
     }
 
@@ -226,7 +226,7 @@ int main(void)
     {
 
         printf("FAIL: Signature is invalid.\n");
-        printf("SPHINCS+-SHA2-128s functional validation failed.\n");
+        printf("SPHINCS+-SHA2-192s functional validation failed.\n");
 
     }
 
