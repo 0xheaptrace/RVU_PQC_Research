@@ -6,6 +6,8 @@
 
 #include "pico/stdlib.h"
 
+#include "hardware/structs/m33.h"
+
 #include "benchmark.h"
 #include "api.h"
 
@@ -16,29 +18,24 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_HQC128_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
-
 
 static uint8_t secret_key[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_HQC128_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
-
 
 static uint8_t ciphertext[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_CIPHERTEXTBYTES
+    PQCLEAN_HQC128_CLEAN_CRYPTO_CIPHERTEXTBYTES
 ];
-
 
 static uint8_t shared_secret_enc[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_BYTES
+    PQCLEAN_HQC128_CLEAN_CRYPTO_BYTES
 ];
-
 
 static uint8_t shared_secret_dec[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_BYTES
+    PQCLEAN_HQC128_CLEAN_CRYPTO_BYTES
 ];
-
 
 
 
@@ -46,11 +43,9 @@ static uint8_t shared_secret_dec[
 typedef struct
 {
     uint64_t total_time;
-
     uint64_t total_cycles;
 
     uint32_t min_time;
-
     uint32_t max_time;
 
     double variance;
@@ -61,17 +56,29 @@ typedef struct
 
 
 
-static inline void enable_cycle_counter()
+/*
+ * ARM Cortex-M33 DWT Cycle Counter
+ */
+
+static inline void enable_cycle_counter(void)
 {
 
-    uint32_t value = 0;
+    /*
+     * Enable trace unit
+     */
+    m33_hw->demcr |= M33_DEMCR_TRCENA_BITS;
 
 
-    asm volatile(
-        "csrw mcountinhibit, %0"
-        :
-        : "r"(value)
-    );
+    /*
+     * Reset counter
+     */
+    m33_hw->dwt_cyccnt = 0;
+
+
+    /*
+     * Enable CYCCNT
+     */
+    m33_hw->dwt_ctrl |= M33_DWT_CTRL_CYCCNTENA_BITS;
 
 }
 
@@ -79,43 +86,9 @@ static inline void enable_cycle_counter()
 
 
 
-
-
-static inline uint64_t read_cycle_counter()
+static inline uint32_t read_cycle_counter(void)
 {
-
-    uint32_t hi1;
-    uint32_t hi2;
-    uint32_t lo;
-
-
-    do
-    {
-
-        asm volatile(
-            "csrr %0, mcycleh"
-            : "=r"(hi1)
-        );
-
-
-        asm volatile(
-            "csrr %0, mcycle"
-            : "=r"(lo)
-        );
-
-
-        asm volatile(
-            "csrr %0, mcycleh"
-            : "=r"(hi2)
-        );
-
-
-    }while(hi1 != hi2);
-
-
-
-    return ((uint64_t)hi1 << 32) | lo;
-
+    return (uint32_t)m33_hw->dwt_cyccnt;
 }
 
 
@@ -133,82 +106,19 @@ void print_processor_info(void)
     printf("============================================================\n");
 
 
-#if defined(__riscv)
+    printf("Architecture : ARM Cortex-M33\n");
 
-    printf("Architecture : RISC-V\n");
+    printf("Core         : RP2350 Cortex-M33\n");
 
-
-#ifdef __riscv_xlen
-
-    printf("XLEN         : %d-bit\n",
-           __riscv_xlen);
-
-#endif
-
-
-
-#ifdef __riscv_mul
-
-    printf("Extension    : M (Multiply)\n");
-
-#endif
-
-
-
-#ifdef __riscv_atomic
-
-    printf("Extension    : A (Atomic)\n");
-
-#endif
-
-
-
-#ifdef __riscv_compressed
-
-    printf("Extension    : C (Compressed)\n");
-
-#endif
-
-
-
-#ifdef __riscv_zicsr
-
-    printf("Extension    : Zicsr\n");
-
-#endif
-
-
-
-#ifdef __riscv_zifencei
-
-    printf("Extension    : Zifencei\n");
-
-#endif
-
-
-
-    printf("Core         : Hazard3 (RP2350)\n");
-
-
-#else
-
-
-    printf("Architecture : ARM\n");
-
-
-#endif
-
-
+    printf("Cycle Counter: ARM Cortex-M33 DWT CYCCNT\n");
 
     printf("Compiler     : %s\n",
            __VERSION__);
 
 
-
     printf("============================================================\n\n");
 
 }
-
 
 
 
@@ -225,7 +135,6 @@ static double calculate_stddev(
     );
 
 }
-
 
 
 
@@ -268,14 +177,26 @@ static void print_result(
     );
 
 }
+
+
+
+
+
+
+
+
+
 static void benchmark_operation(
         const char *name,
         int operation)
 {
 
+
     benchmark_result_t result = {0};
 
+
     result.min_time = 0xffffffff;
+
 
 
     double mean = 0;
@@ -290,8 +211,17 @@ static void benchmark_operation(
             time_us_32();
 
 
-        uint64_t start_cycles =
+
+        /*
+         * Reset DWT counter before every measurement
+         */
+        m33_hw->dwt_cyccnt = 0;
+
+
+
+        uint32_t start_cycles =
             read_cycle_counter();
+
 
 
 
@@ -299,19 +229,17 @@ static void benchmark_operation(
         if(operation == 0)
         {
 
-            PQCLEAN_HQC256_CLEAN_crypto_kem_keypair(
+            PQCLEAN_HQC128_CLEAN_crypto_kem_keypair(
                 public_key,
                 secret_key
             );
 
         }
 
-
-
         else if(operation == 1)
         {
 
-            PQCLEAN_HQC256_CLEAN_crypto_kem_enc(
+            PQCLEAN_HQC128_CLEAN_crypto_kem_enc(
                 ciphertext,
                 shared_secret_enc,
                 public_key
@@ -319,12 +247,10 @@ static void benchmark_operation(
 
         }
 
-
-
         else
         {
 
-            PQCLEAN_HQC256_CLEAN_crypto_kem_dec(
+            PQCLEAN_HQC128_CLEAN_crypto_kem_dec(
                 shared_secret_dec,
                 ciphertext,
                 secret_key
@@ -336,8 +262,11 @@ static void benchmark_operation(
 
 
 
-        uint64_t end_cycles =
+
+        uint32_t end_cycles =
             read_cycle_counter();
+
+
 
 
 
@@ -346,8 +275,9 @@ static void benchmark_operation(
 
 
 
-        uint64_t elapsed_cycles =
+        uint32_t elapsed_cycles =
             end_cycles - start_cycles;
+
 
 
 
@@ -389,7 +319,6 @@ static void benchmark_operation(
             delta*(elapsed_time-mean);
 
 
-
     }
 
 
@@ -412,6 +341,7 @@ static void benchmark_operation(
 static void benchmark_total_kem()
 {
 
+
     benchmark_result_t result = {0};
 
 
@@ -420,8 +350,6 @@ static void benchmark_total_kem()
 
 
     double mean = 0;
-
-
 
 
 
@@ -434,7 +362,11 @@ static void benchmark_total_kem()
 
 
 
-        uint64_t start_cycles =
+        m33_hw->dwt_cyccnt = 0;
+
+
+
+        uint32_t start_cycles =
             read_cycle_counter();
 
 
@@ -442,16 +374,14 @@ static void benchmark_total_kem()
 
 
 
-        PQCLEAN_HQC256_CLEAN_crypto_kem_keypair(
+        PQCLEAN_HQC128_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key
         );
 
 
 
-
-
-        PQCLEAN_HQC256_CLEAN_crypto_kem_enc(
+        PQCLEAN_HQC128_CLEAN_crypto_kem_enc(
             ciphertext,
             shared_secret_enc,
             public_key
@@ -459,10 +389,7 @@ static void benchmark_total_kem()
 
 
 
-
-
-
-        PQCLEAN_HQC256_CLEAN_crypto_kem_dec(
+        PQCLEAN_HQC128_CLEAN_crypto_kem_dec(
             shared_secret_dec,
             ciphertext,
             secret_key
@@ -474,7 +401,7 @@ static void benchmark_total_kem()
 
 
 
-        uint64_t end_cycles =
+        uint32_t end_cycles =
             read_cycle_counter();
 
 
@@ -486,9 +413,9 @@ static void benchmark_total_kem()
 
 
 
-        uint64_t elapsed_cycles =
-            end_cycles - start_cycles;
 
+        uint32_t elapsed_cycles =
+            end_cycles - start_cycles;
 
 
 
@@ -497,7 +424,6 @@ static void benchmark_total_kem()
         result.total_time += elapsed_time;
 
         result.total_cycles += elapsed_cycles;
-
 
 
 
@@ -512,6 +438,7 @@ static void benchmark_total_kem()
         if(elapsed_time > result.max_time)
 
             result.max_time = elapsed_time;
+
 
 
 
@@ -543,7 +470,6 @@ static void benchmark_total_kem()
         &result
     );
 
-
 }
 
 
@@ -557,23 +483,16 @@ static void benchmark_total_kem()
 void run_benchmark(void)
 {
 
+
     enable_cycle_counter();
-
-
 
 
 
     printf("\n");
 
     printf("============================================================\n");
-
-    printf("              HQC-256 Benchmark Results\n");
-
+    printf("              HQC-128 Benchmark Results\n");
     printf("============================================================\n\n");
-
-
-
-
 
 
 
@@ -582,14 +501,10 @@ void run_benchmark(void)
 
 
 
-
-
-
-
     for(int i = 0; i < WARMUP; i++)
     {
 
-        PQCLEAN_HQC256_CLEAN_crypto_kem_keypair(
+        PQCLEAN_HQC128_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key
         );
@@ -598,22 +513,12 @@ void run_benchmark(void)
 
 
 
-
-
-
-
     printf("Warmup complete\n\n");
-
-
-
-
 
 
 
     printf("Running benchmark: %d iterations\n\n",
            ITERATIONS);
-
-
 
 
 
@@ -629,15 +534,10 @@ void run_benchmark(void)
 
 
 
-
-
     benchmark_operation(
         "Key Generation",
         0
     );
-
-
-
 
 
     benchmark_operation(
@@ -646,18 +546,10 @@ void run_benchmark(void)
     );
 
 
-
-
-
     benchmark_operation(
         "Decapsulation",
         2
     );
-
-
-
-
-
 
 
     benchmark_total_kem();
@@ -665,14 +557,7 @@ void run_benchmark(void)
 
 
 
-
-
-
-
     printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
-
-
-
 
 
     printf("\nBenchmark completed.\n");
