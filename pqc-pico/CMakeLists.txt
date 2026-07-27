@@ -22,32 +22,32 @@ add_executable(pqc_pico
 
 
     # =====================================================
-    # HQC-192 Clean Implementation
+    # HQC-256 Clean Implementation
     # =====================================================
 
-    ../PQClean/crypto_kem/hqc-192/clean/kem.c
+    ../PQClean/crypto_kem/hqc-256/clean/kem.c
 
-    ../PQClean/crypto_kem/hqc-192/clean/hqc.c
+    ../PQClean/crypto_kem/hqc-256/clean/hqc.c
 
-    ../PQClean/crypto_kem/hqc-192/clean/code.c
+    ../PQClean/crypto_kem/hqc-256/clean/code.c
 
-    ../PQClean/crypto_kem/hqc-192/clean/fft.c
+    ../PQClean/crypto_kem/hqc-256/clean/fft.c
 
-    ../PQClean/crypto_kem/hqc-192/clean/gf.c
+    ../PQClean/crypto_kem/hqc-256/clean/gf.c
 
-    ../PQClean/crypto_kem/hqc-192/clean/gf2x.c
+    ../PQClean/crypto_kem/hqc-256/clean/gf2x.c
 
-    ../PQClean/crypto_kem/hqc-192/clean/parsing.c
+    ../PQClean/crypto_kem/hqc-256/clean/parsing.c
 
-    ../PQClean/crypto_kem/hqc-192/clean/reed_muller.c
+    ../PQClean/crypto_kem/hqc-256/clean/reed_muller.c
 
-    ../PQClean/crypto_kem/hqc-192/clean/reed_solomon.c
+    ../PQClean/crypto_kem/hqc-256/clean/reed_solomon.c
 
-    ../PQClean/crypto_kem/hqc-192/clean/vector.c
+    ../PQClean/crypto_kem/hqc-256/clean/vector.c
 
-    ../PQClean/crypto_kem/hqc-192/clean/shake_ds.c
+    ../PQClean/crypto_kem/hqc-256/clean/shake_ds.c
 
-    ../PQClean/crypto_kem/hqc-192/clean/shake_prng.c
+    ../PQClean/crypto_kem/hqc-256/clean/shake_prng.c
 
 
 
@@ -73,7 +73,7 @@ target_include_directories(pqc_pico PRIVATE
 
     ../PQClean/common
 
-    ../PQClean/crypto_kem/hqc-192/clean
+    ../PQClean/crypto_kem/hqc-256/clean
 
 )
 
@@ -95,7 +95,7 @@ target_link_libraries(pqc_pico
 
 
 
-# USB Serial
+# USB Serial Output
 
 pico_enable_stdio_usb(pqc_pico 1)
 
