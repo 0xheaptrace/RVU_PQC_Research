@@ -23,20 +23,19 @@ add_executable(pqc_pico
     src/randombytes.c
 
 
-    # ML-KEM-1024 PQClean Clean implementation
+    # ML-DSA-44 PQClean Clean implementation
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/kem.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/indcpa.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/poly.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/polyvec.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/ntt.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/reduce.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/cbd.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/symmetric-shake.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/verify.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-44/clean/sign.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-44/clean/packing.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-44/clean/ntt.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-44/clean/poly.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-44/clean/polyvec.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-44/clean/reduce.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-44/clean/rounding.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-44/clean/symmetric-shake.c
 
 
-    # PQClean common crypto
+    # PQClean common
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/fips202.c
 
@@ -54,12 +53,12 @@ target_include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/src
 
 
-    # ML-KEM-1024 headers
+    # ML-DSA-44 headers
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-44/clean
 
 
-    # PQClean common headers
+    # PQClean common
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common
 

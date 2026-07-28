@@ -12,30 +12,33 @@
 #include "api.h"
 
 
-#define ITERATIONS 100
-#define WARMUP 3
+#define ITERATIONS 10000
+#define WARMUP 100
 
 
 
 static uint8_t public_key[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_MLDSA44_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
+
 
 static uint8_t secret_key[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_MLDSA44_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
-static uint8_t ciphertext[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_CIPHERTEXTBYTES
+
+static uint8_t signature[
+    PQCLEAN_MLDSA44_CLEAN_CRYPTO_BYTES
 ];
 
-static uint8_t shared_secret_enc[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_BYTES
-];
 
-static uint8_t shared_secret_dec[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_BYTES
-];
+static uint8_t message[] =
+{
+    "ML-DSA-44 Benchmark Message"
+};
+
+
+static size_t signature_length;
 
 
 
@@ -54,6 +57,7 @@ typedef struct
     double variance;
 
 } benchmark_result_t;
+
 
 
 
@@ -82,13 +86,13 @@ static inline void enable_cycle_counter(void)
 
 
 
-
 static inline uint32_t read_cycle_counter(void)
 {
 
     return (uint32_t)m33_hw->dwt_cyccnt;
 
 }
+
 
 
 
@@ -118,6 +122,7 @@ void print_processor_info(void)
     printf("============================================================\n\n");
 
 }
+
 
 
 
@@ -223,35 +228,48 @@ static void benchmark_operation(
 
 
 
+
         if(operation == 0)
         {
 
-            PQCLEAN_MLKEM1024_CLEAN_crypto_kem_keypair(
+
+            PQCLEAN_MLDSA44_CLEAN_crypto_sign_keypair(
                 public_key,
                 secret_key
             );
 
+
         }
+
 
         else if(operation == 1)
         {
 
-            PQCLEAN_MLKEM1024_CLEAN_crypto_kem_enc(
-                ciphertext,
-                shared_secret_enc,
-                public_key
+
+            PQCLEAN_MLDSA44_CLEAN_crypto_sign_signature(
+                signature,
+                &signature_length,
+                message,
+                sizeof(message),
+                secret_key
             );
 
+
         }
+
 
         else
         {
 
-            PQCLEAN_MLKEM1024_CLEAN_crypto_kem_dec(
-                shared_secret_dec,
-                ciphertext,
-                secret_key
+
+            PQCLEAN_MLDSA44_CLEAN_crypto_sign_verify(
+                signature,
+                signature_length,
+                message,
+                sizeof(message),
+                public_key
             );
+
 
         }
 
@@ -262,6 +280,7 @@ static void benchmark_operation(
 
         uint32_t end_cycles =
             read_cycle_counter();
+
 
 
 
@@ -279,9 +298,11 @@ static void benchmark_operation(
 
 
 
+
         result.total_time += elapsed_time;
 
         result.total_cycles += elapsed_cycles;
+
 
 
 
@@ -301,6 +322,8 @@ static void benchmark_operation(
 
 
 
+
+
         double delta =
             elapsed_time - mean;
 
@@ -312,6 +335,7 @@ static void benchmark_operation(
 
         result.variance +=
             delta*(elapsed_time-mean);
+
 
 
     }
@@ -333,7 +357,7 @@ static void benchmark_operation(
 
 
 
-static void benchmark_total_kem()
+static void benchmark_total_signature()
 {
 
 
@@ -369,25 +393,33 @@ static void benchmark_total_kem()
 
 
 
-        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_keypair(
+
+        PQCLEAN_MLDSA44_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
 
 
 
-        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_enc(
-            ciphertext,
-            shared_secret_enc,
-            public_key
+
+        PQCLEAN_MLDSA44_CLEAN_crypto_sign_signature(
+            signature,
+            &signature_length,
+            message,
+            sizeof(message),
+            secret_key
         );
 
 
 
-        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_dec(
-            shared_secret_dec,
-            ciphertext,
-            secret_key
+
+
+        PQCLEAN_MLDSA44_CLEAN_crypto_sign_verify(
+            signature,
+            signature_length,
+            message,
+            sizeof(message),
+            public_key
         );
 
 
@@ -398,6 +430,7 @@ static void benchmark_total_kem()
 
         uint32_t end_cycles =
             read_cycle_counter();
+
 
 
 
@@ -415,9 +448,11 @@ static void benchmark_total_kem()
 
 
 
+
         result.total_time += elapsed_time;
 
         result.total_cycles += elapsed_cycles;
+
 
 
 
@@ -432,7 +467,6 @@ static void benchmark_total_kem()
         if(elapsed_time > result.max_time)
 
             result.max_time = elapsed_time;
-
 
 
 
@@ -457,10 +491,8 @@ static void benchmark_total_kem()
 
 
 
-
-
     print_result(
-        "Total KEM",
+        "Total Sign",
         &result
     );
 
@@ -482,11 +514,14 @@ void run_benchmark(void)
 
 
 
+
     printf("\n");
 
     printf("============================================================\n");
-    printf("              ML-KEM-1024 Benchmark Results\n");
+    printf("              ML-DSA-44 Benchmark Results\n");
     printf("============================================================\n\n");
+
+
 
 
 
@@ -495,15 +530,20 @@ void run_benchmark(void)
 
 
 
+
     for(int i = 0; i < WARMUP; i++)
     {
 
-        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_keypair(
+
+        PQCLEAN_MLDSA44_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
 
+
     }
+
+
 
 
 
@@ -511,8 +551,11 @@ void run_benchmark(void)
 
 
 
+
+
     printf("Running benchmark: %d iterations\n\n",
            ITERATIONS);
+
 
 
 
@@ -535,19 +578,23 @@ void run_benchmark(void)
     );
 
 
+
     benchmark_operation(
-        "Encapsulation",
+        "Signature Gen",
         1
     );
 
 
+
     benchmark_operation(
-        "Decapsulation",
+        "Verification",
         2
     );
 
 
-    benchmark_total_kem();
+
+    benchmark_total_signature();
+
 
 
 
