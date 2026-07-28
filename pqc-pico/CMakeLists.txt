@@ -33,20 +33,20 @@ add_executable(pqc_pico
 
 
 
-    # HQC-128 PQClean clean implementation
+    # HQC-192 PQClean clean implementation
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean/kem.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean/hqc.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean/code.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean/fft.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean/gf.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean/gf2x.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean/parsing.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean/reed_muller.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean/reed_solomon.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean/vector.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean/shake_ds.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean/shake_prng.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/kem.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/hqc.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/code.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/fft.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/gf.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/gf2x.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/parsing.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/reed_muller.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/reed_solomon.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/vector.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/shake_ds.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/shake_prng.c
 
 
 
@@ -61,8 +61,6 @@ add_executable(pqc_pico
 
 
 
-
-# Force C linker
 
 set_target_properties(
     pqc_pico
@@ -85,9 +83,9 @@ target_include_directories(
 
 
 
-    # HQC-128 headers
+    # HQC-192 headers
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-128/clean
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean
 
 
 
@@ -96,15 +94,8 @@ target_include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common
 
 
-
-    # ARM Cortex-M33 PMU headers
-
-    ${PICO_SDK_PATH}/src/rp2_common/cmsis/stub/CMSIS/Core/Include
-
-    ${PICO_SDK_PATH}/src/rp2_common/cmsis/stub/CMSIS/Core/Include/m-profile
-
-
 )
+
 
 
 
@@ -119,6 +110,7 @@ target_link_libraries(
     hardware_clocks
 
     pico_rand
+
 )
 
 
