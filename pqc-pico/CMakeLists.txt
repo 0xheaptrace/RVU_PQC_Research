@@ -33,20 +33,20 @@ add_executable(pqc_pico
 
 
 
-    # HQC-192 PQClean clean implementation
+    # HQC-256 PQClean clean implementation
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/kem.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/hqc.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/code.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/fft.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/gf.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/gf2x.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/parsing.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/reed_muller.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/reed_solomon.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/vector.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/shake_ds.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean/shake_prng.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/kem.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/hqc.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/code.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/fft.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/gf.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/gf2x.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/parsing.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/reed_muller.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/reed_solomon.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/vector.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/shake_ds.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/shake_prng.c
 
 
 
@@ -83,16 +83,15 @@ target_include_directories(
 
 
 
-    # HQC-192 headers
+    # HQC-256 headers
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-192/clean
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean
 
 
 
     # PQClean common headers
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common
-
 
 )
 
