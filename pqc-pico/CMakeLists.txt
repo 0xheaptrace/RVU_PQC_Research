@@ -23,17 +23,17 @@ add_executable(pqc_pico
     src/randombytes.c
 
 
-    # ML-KEM-768 PQClean Clean implementation
+    # ML-KEM-1024 PQClean Clean implementation
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-768/clean/kem.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-768/clean/indcpa.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-768/clean/poly.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-768/clean/polyvec.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-768/clean/ntt.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-768/clean/reduce.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-768/clean/cbd.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-768/clean/symmetric-shake.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-768/clean/verify.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/kem.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/indcpa.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/poly.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/polyvec.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/ntt.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/reduce.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/cbd.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/symmetric-shake.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/verify.c
 
 
     # PQClean common crypto
@@ -54,15 +54,14 @@ target_include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/src
 
 
-    # ML-KEM-768 headers
+    # ML-KEM-1024 headers
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-768/clean
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean
 
 
     # PQClean common headers
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common
-
 
 )
 
