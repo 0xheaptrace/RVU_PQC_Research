@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <math.h>
-#include <string.h>
 
 #include "pico/stdlib.h"
 
@@ -18,27 +17,24 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_MLDSA44_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
-
 
 static uint8_t secret_key[
-    PQCLEAN_MLDSA44_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
-
-static uint8_t signature[
-    PQCLEAN_MLDSA44_CLEAN_CRYPTO_BYTES
+static uint8_t ciphertext[
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_CIPHERTEXTBYTES
 ];
 
+static uint8_t shared_secret_enc[
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES
+];
 
-static uint8_t message[] =
-{
-    "ML-DSA-44 Benchmark Message"
-};
-
-
-static size_t signature_length;
+static uint8_t shared_secret_dec[
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES
+];
 
 
 
@@ -46,6 +42,7 @@ static size_t signature_length;
 
 typedef struct
 {
+
     uint64_t total_time;
 
     uint64_t total_cycles;
@@ -63,24 +60,35 @@ typedef struct
 
 
 
-
 /*
  * ARM Cortex-M33 DWT Cycle Counter
  */
 
-
 static inline void enable_cycle_counter(void)
 {
+
+    /*
+     * Enable trace unit
+     */
 
     m33_hw->demcr |= M33_DEMCR_TRCENA_BITS;
 
 
+    /*
+     * Reset counter
+     */
+
     m33_hw->dwt_cyccnt = 0;
 
+
+    /*
+     * Enable CYCCNT
+     */
 
     m33_hw->dwt_ctrl |= M33_DWT_CTRL_CYCCNTENA_BITS;
 
 }
+
 
 
 
@@ -99,11 +107,11 @@ static inline uint32_t read_cycle_counter(void)
 
 
 
-
 void print_processor_info(void)
 {
 
     printf("\n");
+
     printf("============================================================\n");
     printf("                 Processor Information\n");
     printf("============================================================\n");
@@ -139,7 +147,6 @@ static double calculate_stddev(
     );
 
 }
-
 
 
 
@@ -208,6 +215,7 @@ static void benchmark_operation(
 
 
 
+
     for(int i = 0; i < ITERATIONS; i++)
     {
 
@@ -216,6 +224,10 @@ static void benchmark_operation(
             time_us_32();
 
 
+
+        /*
+         * Reset DWT counter
+         */
 
         m33_hw->dwt_cyccnt = 0;
 
@@ -228,12 +240,11 @@ static void benchmark_operation(
 
 
 
-
         if(operation == 0)
         {
 
 
-            PQCLEAN_MLDSA44_CLEAN_crypto_sign_keypair(
+            PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
                 public_key,
                 secret_key
             );
@@ -246,12 +257,10 @@ static void benchmark_operation(
         {
 
 
-            PQCLEAN_MLDSA44_CLEAN_crypto_sign_signature(
-                signature,
-                &signature_length,
-                message,
-                sizeof(message),
-                secret_key
+            PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(
+                ciphertext,
+                shared_secret_enc,
+                public_key
             );
 
 
@@ -262,12 +271,10 @@ static void benchmark_operation(
         {
 
 
-            PQCLEAN_MLDSA44_CLEAN_crypto_sign_verify(
-                signature,
-                signature_length,
-                message,
-                sizeof(message),
-                public_key
+            PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(
+                shared_secret_dec,
+                ciphertext,
+                secret_key
             );
 
 
@@ -280,8 +287,6 @@ static void benchmark_operation(
 
         uint32_t end_cycles =
             read_cycle_counter();
-
-
 
 
 
@@ -337,8 +342,8 @@ static void benchmark_operation(
             delta*(elapsed_time-mean);
 
 
-
     }
+
 
 
 
@@ -357,7 +362,7 @@ static void benchmark_operation(
 
 
 
-static void benchmark_total_signature()
+static void benchmark_total_kem()
 {
 
 
@@ -369,6 +374,8 @@ static void benchmark_total_signature()
 
 
     double mean = 0;
+
+
 
 
 
@@ -393,8 +400,7 @@ static void benchmark_total_signature()
 
 
 
-
-        PQCLEAN_MLDSA44_CLEAN_crypto_sign_keypair(
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key
         );
@@ -402,24 +408,19 @@ static void benchmark_total_signature()
 
 
 
-        PQCLEAN_MLDSA44_CLEAN_crypto_sign_signature(
-            signature,
-            &signature_length,
-            message,
-            sizeof(message),
-            secret_key
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(
+            ciphertext,
+            shared_secret_enc,
+            public_key
         );
 
 
 
 
-
-        PQCLEAN_MLDSA44_CLEAN_crypto_sign_verify(
-            signature,
-            signature_length,
-            message,
-            sizeof(message),
-            public_key
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(
+            shared_secret_dec,
+            ciphertext,
+            secret_key
         );
 
 
@@ -430,7 +431,6 @@ static void benchmark_total_signature()
 
         uint32_t end_cycles =
             read_cycle_counter();
-
 
 
 
@@ -473,6 +473,7 @@ static void benchmark_total_signature()
 
 
 
+
         double delta =
             elapsed_time - mean;
 
@@ -486,15 +487,17 @@ static void benchmark_total_signature()
             delta*(elapsed_time-mean);
 
 
-
     }
 
 
 
+
+
     print_result(
-        "Total Sign",
+        "Total KEM",
         &result
     );
+
 
 }
 
@@ -518,7 +521,7 @@ void run_benchmark(void)
     printf("\n");
 
     printf("============================================================\n");
-    printf("              ML-DSA-44 Benchmark Results\n");
+    printf("              ML-KEM-512 Benchmark Results\n");
     printf("============================================================\n\n");
 
 
@@ -531,11 +534,12 @@ void run_benchmark(void)
 
 
 
+
     for(int i = 0; i < WARMUP; i++)
     {
 
 
-        PQCLEAN_MLDSA44_CLEAN_crypto_sign_keypair(
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key
         );
@@ -561,11 +565,14 @@ void run_benchmark(void)
 
 
 
+
     printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
 
     printf("| Operation      | Mean (us)   | Mean (ms)   | Cycles      | Min (us)    | Max (us)    | Std Dev    |\n");
 
     printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
+
+
 
 
 
@@ -579,21 +586,24 @@ void run_benchmark(void)
 
 
 
+
     benchmark_operation(
-        "Signature Gen",
+        "Encapsulation",
         1
     );
 
 
 
+
     benchmark_operation(
-        "Verification",
+        "Decapsulation",
         2
     );
 
 
 
-    benchmark_total_signature();
+
+    benchmark_total_kem();
 
 
 
@@ -601,6 +611,7 @@ void run_benchmark(void)
 
 
     printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
+
 
 
     printf("\nBenchmark completed.\n");
