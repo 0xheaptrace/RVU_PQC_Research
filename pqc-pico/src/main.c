@@ -12,32 +12,34 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 
 static uint8_t secret_key[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 
 static uint8_t ciphertext[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_CIPHERTEXTBYTES
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_CIPHERTEXTBYTES
 ];
 
 
 
 static uint8_t shared_secret_enc[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES
 ];
 
 
 
 static uint8_t shared_secret_dec[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES
 ];
+
+
 
 
 
@@ -50,7 +52,7 @@ static void print_banner(void)
 
     printf("\n");
     printf("============================================================\n");
-    printf("             HQC-256 Functional Validation\n");
+    printf("             ML-KEM-512 Functional Validation\n");
     printf("             Raspberry Pi Pico 2 W (RP2350)\n");
     printf("             PQClean Clean Implementation\n");
     printf("============================================================\n\n");
@@ -93,12 +95,12 @@ int main(void)
 
 
 
-    printf("[1/4] Generating HQC-256 Key Pair...\n\n");
+    printf("[1/4] Generating ML-KEM-512 Key Pair...\n\n");
 
 
 
     if(
-        PQCLEAN_HQC256_CLEAN_crypto_kem_keypair(
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key
         ) != 0
@@ -124,12 +126,15 @@ int main(void)
 
 
 
+
+
+
     printf("[2/4] Encapsulating Shared Secret...\n\n");
 
 
 
     if(
-        PQCLEAN_HQC256_CLEAN_crypto_kem_enc(
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(
             ciphertext,
             shared_secret_enc,
             public_key
@@ -156,12 +161,15 @@ int main(void)
 
 
 
+
+
+
     printf("[3/4] Decapsulating Shared Secret...\n\n");
 
 
 
     if(
-        PQCLEAN_HQC256_CLEAN_crypto_kem_dec(
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(
             shared_secret_dec,
             ciphertext,
             secret_key
@@ -188,6 +196,9 @@ int main(void)
 
 
 
+
+
+
     printf("[4/4] Verification Result...\n\n");
 
 
@@ -203,17 +214,18 @@ int main(void)
 
 
 
+
     if(
         memcmp(
             shared_secret_enc,
             shared_secret_dec,
-            PQCLEAN_HQC256_CLEAN_CRYPTO_BYTES
+            PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES
         ) == 0
     )
     {
 
         printf("PASS: Shared secrets match.\n");
-        printf("HQC-256 functional validation successful.\n");
+        printf("ML-KEM-512 functional validation successful.\n");
 
     }
 
@@ -221,13 +233,14 @@ int main(void)
     {
 
         printf("FAIL: Shared secrets do not match.\n");
-        printf("HQC-256 functional validation failed.\n");
+        printf("ML-KEM-512 functional validation failed.\n");
 
     }
 
 
 
     printf("=============================================\n\n");
+
 
 
 

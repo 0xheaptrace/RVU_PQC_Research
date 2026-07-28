@@ -18,24 +18,25 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 static uint8_t secret_key[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 static uint8_t ciphertext[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_CIPHERTEXTBYTES
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_CIPHERTEXTBYTES
 ];
 
 static uint8_t shared_secret_enc[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES
 ];
 
 static uint8_t shared_secret_dec[
-    PQCLEAN_HQC256_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLKEM512_CLEAN_CRYPTO_BYTES
 ];
+
 
 
 
@@ -43,9 +44,11 @@ static uint8_t shared_secret_dec[
 typedef struct
 {
     uint64_t total_time;
+
     uint64_t total_cycles;
 
     uint32_t min_time;
+
     uint32_t max_time;
 
     double variance;
@@ -56,28 +59,21 @@ typedef struct
 
 
 
+
 /*
  * ARM Cortex-M33 DWT Cycle Counter
  */
 
+
 static inline void enable_cycle_counter(void)
 {
 
-    /*
-     * Enable trace unit
-     */
     m33_hw->demcr |= M33_DEMCR_TRCENA_BITS;
 
 
-    /*
-     * Reset counter
-     */
     m33_hw->dwt_cyccnt = 0;
 
 
-    /*
-     * Enable CYCCNT
-     */
     m33_hw->dwt_ctrl |= M33_DWT_CTRL_CYCCNTENA_BITS;
 
 }
@@ -86,9 +82,12 @@ static inline void enable_cycle_counter(void)
 
 
 
+
 static inline uint32_t read_cycle_counter(void)
 {
+
     return (uint32_t)m33_hw->dwt_cyccnt;
+
 }
 
 
@@ -135,6 +134,7 @@ static double calculate_stddev(
     );
 
 }
+
 
 
 
@@ -212,9 +212,6 @@ static void benchmark_operation(
 
 
 
-        /*
-         * Reset DWT counter before every measurement
-         */
         m33_hw->dwt_cyccnt = 0;
 
 
@@ -229,7 +226,7 @@ static void benchmark_operation(
         if(operation == 0)
         {
 
-            PQCLEAN_HQC256_CLEAN_crypto_kem_keypair(
+            PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
                 public_key,
                 secret_key
             );
@@ -239,7 +236,7 @@ static void benchmark_operation(
         else if(operation == 1)
         {
 
-            PQCLEAN_HQC256_CLEAN_crypto_kem_enc(
+            PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(
                 ciphertext,
                 shared_secret_enc,
                 public_key
@@ -250,7 +247,7 @@ static void benchmark_operation(
         else
         {
 
-            PQCLEAN_HQC256_CLEAN_crypto_kem_dec(
+            PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(
                 shared_secret_dec,
                 ciphertext,
                 secret_key
@@ -282,7 +279,6 @@ static void benchmark_operation(
 
 
 
-
         result.total_time += elapsed_time;
 
         result.total_cycles += elapsed_cycles;
@@ -300,7 +296,6 @@ static void benchmark_operation(
         if(elapsed_time > result.max_time)
 
             result.max_time = elapsed_time;
-
 
 
 
@@ -374,14 +369,14 @@ static void benchmark_total_kem()
 
 
 
-        PQCLEAN_HQC256_CLEAN_crypto_kem_keypair(
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key
         );
 
 
 
-        PQCLEAN_HQC256_CLEAN_crypto_kem_enc(
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_enc(
             ciphertext,
             shared_secret_enc,
             public_key
@@ -389,7 +384,7 @@ static void benchmark_total_kem()
 
 
 
-        PQCLEAN_HQC256_CLEAN_crypto_kem_dec(
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_dec(
             shared_secret_dec,
             ciphertext,
             secret_key
@@ -410,7 +405,6 @@ static void benchmark_total_kem()
 
         uint32_t elapsed_time =
             time_us_32() - start_time;
-
 
 
 
@@ -491,7 +485,7 @@ void run_benchmark(void)
     printf("\n");
 
     printf("============================================================\n");
-    printf("              HQC-256 Benchmark Results\n");
+    printf("              ML-KEM-512 Benchmark Results\n");
     printf("============================================================\n\n");
 
 
@@ -504,7 +498,7 @@ void run_benchmark(void)
     for(int i = 0; i < WARMUP; i++)
     {
 
-        PQCLEAN_HQC256_CLEAN_crypto_kem_keypair(
+        PQCLEAN_MLKEM512_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key
         );
@@ -534,6 +528,7 @@ void run_benchmark(void)
 
 
 
+
     benchmark_operation(
         "Key Generation",
         0
@@ -553,6 +548,7 @@ void run_benchmark(void)
 
 
     benchmark_total_kem();
+
 
 
 

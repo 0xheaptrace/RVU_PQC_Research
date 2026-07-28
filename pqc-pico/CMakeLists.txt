@@ -33,34 +33,46 @@ add_executable(pqc_pico
 
 
 
-    # HQC-256 PQClean clean implementation
+    # =====================================================
+    # ML-KEM-512 PQClean Clean Implementation
+    # =====================================================
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/kem.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/hqc.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/code.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/fft.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/gf.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/gf2x.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/parsing.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/reed_muller.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/reed_solomon.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/vector.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/shake_ds.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean/shake_prng.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-512/clean/kem.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-512/clean/indcpa.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-512/clean/poly.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-512/clean/polyvec.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-512/clean/ntt.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-512/clean/reduce.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-512/clean/cbd.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-512/clean/symmetric-shake.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-512/clean/verify.c
 
 
 
-    # PQClean common crypto
+    # =====================================================
+    # PQClean Common
+    # =====================================================
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/fips202.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/sha2.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/aes.c
+
 
 )
 
 
 
 
+
+
+
+# Force C linker
 
 set_target_properties(
     pqc_pico
@@ -83,9 +95,9 @@ target_include_directories(
 
 
 
-    # HQC-256 headers
+    # ML-KEM-512 headers
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/hqc-256/clean
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-512/clean
 
 
 
@@ -93,7 +105,17 @@ target_include_directories(
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common
 
+
+
+    # RP2350 Cortex-M33 headers
+
+    ${PICO_SDK_PATH}/src/rp2_common/cmsis/stub/CMSIS/Core/Include
+
+    ${PICO_SDK_PATH}/src/rp2_common/cmsis/stub/CMSIS/Core/Include/m-profile
+
+
 )
+
 
 
 
@@ -128,6 +150,8 @@ pico_enable_stdio_uart(
     pqc_pico
     0
 )
+
+
 
 
 
