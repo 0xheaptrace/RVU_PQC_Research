@@ -17,23 +17,23 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_MLKEM768_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 static uint8_t secret_key[
-    PQCLEAN_MLKEM768_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 static uint8_t ciphertext[
-    PQCLEAN_MLKEM768_CLEAN_CRYPTO_CIPHERTEXTBYTES
+    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_CIPHERTEXTBYTES
 ];
 
 static uint8_t shared_secret_enc[
-    PQCLEAN_MLKEM768_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_BYTES
 ];
 
 static uint8_t shared_secret_dec[
-    PQCLEAN_MLKEM768_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_BYTES
 ];
 
 
@@ -244,7 +244,7 @@ static void benchmark_operation(
         {
 
 
-            PQCLEAN_MLKEM768_CLEAN_crypto_kem_keypair(
+            PQCLEAN_MLKEM1024_CLEAN_crypto_kem_keypair(
                 public_key,
                 secret_key
             );
@@ -257,7 +257,7 @@ static void benchmark_operation(
         {
 
 
-            PQCLEAN_MLKEM768_CLEAN_crypto_kem_enc(
+            PQCLEAN_MLKEM1024_CLEAN_crypto_kem_enc(
                 ciphertext,
                 shared_secret_enc,
                 public_key
@@ -271,7 +271,7 @@ static void benchmark_operation(
         {
 
 
-            PQCLEAN_MLKEM768_CLEAN_crypto_kem_dec(
+            PQCLEAN_MLKEM1024_CLEAN_crypto_kem_dec(
                 shared_secret_dec,
                 ciphertext,
                 secret_key
@@ -400,7 +400,7 @@ static void benchmark_total_kem()
 
 
 
-        PQCLEAN_MLKEM768_CLEAN_crypto_kem_keypair(
+        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key
         );
@@ -408,7 +408,7 @@ static void benchmark_total_kem()
 
 
 
-        PQCLEAN_MLKEM768_CLEAN_crypto_kem_enc(
+        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_enc(
             ciphertext,
             shared_secret_enc,
             public_key
@@ -417,7 +417,7 @@ static void benchmark_total_kem()
 
 
 
-        PQCLEAN_MLKEM768_CLEAN_crypto_kem_dec(
+        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_dec(
             shared_secret_dec,
             ciphertext,
             secret_key
@@ -521,7 +521,7 @@ void run_benchmark(void)
     printf("\n");
 
     printf("============================================================\n");
-    printf("              ML-KEM-768 Benchmark Results\n");
+    printf("              ML-KEM-1024 Benchmark Results\n");
     printf("============================================================\n\n");
 
 
@@ -539,7 +539,7 @@ void run_benchmark(void)
     {
 
 
-        PQCLEAN_MLKEM768_CLEAN_crypto_kem_keypair(
+        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_keypair(
             public_key,
             secret_key
         );
