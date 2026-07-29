@@ -23,44 +23,47 @@ add_executable(pqc_pico
     src/randombytes.c
 
 
-    # Falcon-512 PQClean Clean implementation
+    # Falcon-1024 PQClean Clean implementation
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/sign.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/keygen.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/fft.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/fpr.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/codec.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/common.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/rng.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/vrfy.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/pqclean.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/codec.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/common.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/fft.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/fpr.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/keygen.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/pqclean.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/rng.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/sign.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/vrfy.c
 
-
-    # PQClean common
-
+    # PQClean common sources
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/fips202.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/aes.c
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/sha2.c
-
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/nistseedexpander.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/sp800-185.c
 )
-
-
 
 
 
 target_include_directories(
     pqc_pico
-
     PRIVATE
+
 
     ${CMAKE_CURRENT_LIST_DIR}/src
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean
+
+    # Falcon-1024 headers
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean
+
+
+    # PQClean common headers
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common
 
+
 )
-
-
 
 
 
@@ -71,9 +74,8 @@ target_link_libraries(
     pico_rand
 
     hardware_clocks
+
 )
-
-
 
 
 

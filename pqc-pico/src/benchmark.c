@@ -21,22 +21,22 @@
 
 
 static uint8_t public_key[
-    PQCLEAN_FALCON512_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_FALCON1024_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 static uint8_t secret_key[
-    PQCLEAN_FALCON512_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_FALCON1024_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 static uint8_t signature[
-    PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES
+    PQCLEAN_FALCON1024_CLEAN_CRYPTO_BYTES
 ];
 
 
 static uint8_t message[] =
-    "Falcon-512 benchmark message";
+    "Falcon-1024 benchmark message";
 
 
 static size_t signature_length;
@@ -245,7 +245,7 @@ static void benchmark_operation(
         {
 
 
-            PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
+            PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(
                 public_key,
                 secret_key
             );
@@ -258,7 +258,7 @@ static void benchmark_operation(
         {
 
 
-            PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(
+            PQCLEAN_FALCON1024_CLEAN_crypto_sign_signature(
                 signature,
                 &signature_length,
                 message,
@@ -274,7 +274,7 @@ static void benchmark_operation(
         {
 
 
-            PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
+            PQCLEAN_FALCON1024_CLEAN_crypto_sign_verify(
                 signature,
                 signature_length,
                 message,
@@ -407,7 +407,7 @@ static void benchmark_total_sign()
 
 
 
-        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
+        PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
@@ -415,7 +415,7 @@ static void benchmark_total_sign()
 
 
 
-        PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(
+        PQCLEAN_FALCON1024_CLEAN_crypto_sign_signature(
             signature,
             &signature_length,
             message,
@@ -426,7 +426,7 @@ static void benchmark_total_sign()
 
 
 
-        PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
+        PQCLEAN_FALCON1024_CLEAN_crypto_sign_verify(
             signature,
             signature_length,
             message,
@@ -534,7 +534,7 @@ void run_benchmark(void)
     printf("\n");
 
     printf("============================================================\n");
-    printf("              Falcon-512 Benchmark Results\n");
+    printf("              Falcon-1024 Benchmark Results\n");
     printf("============================================================\n\n");
 
 
@@ -553,7 +553,7 @@ void run_benchmark(void)
     {
 
 
-        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
+        PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
