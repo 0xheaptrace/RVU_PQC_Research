@@ -4,7 +4,6 @@
 #include <math.h>
 #include <string.h>
 
-
 #include "pico/stdlib.h"
 
 #include "hardware/structs/m33.h"
@@ -14,35 +13,32 @@
 
 
 
-#define ITERATIONS 100
-#define WARMUP 3
-
+#define ITERATIONS 10
+#define WARMUP 1
 
 
 
 static uint8_t public_key[
-    PQCLEAN_FALCON1024_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 static uint8_t secret_key[
-    PQCLEAN_FALCON1024_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 static uint8_t signature[
-    PQCLEAN_FALCON1024_CLEAN_CRYPTO_BYTES
+    PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_CRYPTO_BYTES
 ];
 
 
+static size_t signature_len;
+
+
+
 static uint8_t message[] =
-    "Falcon-1024 benchmark message";
-
-
-static size_t signature_length;
-
-
-
+    "SPHINCS+-SHA2-128s-simple Benchmark";
 
 
 
@@ -66,10 +62,8 @@ typedef struct
 
 
 
-
-
 /*
- * ARM Cortex-M33 DWT CYCCNT
+ * ARM Cortex-M33 DWT Cycle Counter
  */
 
 
@@ -90,8 +84,6 @@ static inline void enable_cycle_counter(void)
 
 
 
-
-
 static inline uint32_t read_cycle_counter(void)
 {
 
@@ -103,14 +95,10 @@ static inline uint32_t read_cycle_counter(void)
 
 
 
-
-
-
 void print_processor_info(void)
 {
 
     printf("\n");
-
     printf("============================================================\n");
     printf("                 Processor Information\n");
     printf("============================================================\n");
@@ -134,11 +122,6 @@ void print_processor_info(void)
 
 
 
-
-
-
-
-
 static double calculate_stddev(
         benchmark_result_t *result)
 {
@@ -155,13 +138,11 @@ static double calculate_stddev(
 
 
 
-
-
-
 static void print_result(
         const char *name,
         benchmark_result_t *result)
 {
+
 
     uint64_t mean_time =
         result->total_time / ITERATIONS;
@@ -199,12 +180,11 @@ static void print_result(
 
 
 
-
-
 static void benchmark_operation(
         const char *name,
         int operation)
 {
+
 
     benchmark_result_t result = {0};
 
@@ -212,10 +192,7 @@ static void benchmark_operation(
     result.min_time = 0xffffffff;
 
 
-
     double mean = 0;
-
-
 
 
 
@@ -231,11 +208,8 @@ static void benchmark_operation(
         m33_hw->dwt_cyccnt = 0;
 
 
-
         uint32_t start_cycles =
             read_cycle_counter();
-
-
 
 
 
@@ -244,12 +218,10 @@ static void benchmark_operation(
         if(operation == 0)
         {
 
-
-            PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(
+            PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_keypair(
                 public_key,
                 secret_key
             );
-
 
         }
 
@@ -257,15 +229,13 @@ static void benchmark_operation(
         else if(operation == 1)
         {
 
-
-            PQCLEAN_FALCON1024_CLEAN_crypto_sign_signature(
+            PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_signature(
                 signature,
-                &signature_length,
+                &signature_len,
                 message,
-                sizeof(message)-1,
+                sizeof(message),
                 secret_key
             );
-
 
         }
 
@@ -273,20 +243,15 @@ static void benchmark_operation(
         else
         {
 
-
-            PQCLEAN_FALCON1024_CLEAN_crypto_sign_verify(
+            PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_verify(
                 signature,
-                signature_length,
+                signature_len,
                 message,
-                sizeof(message)-1,
+                sizeof(message),
                 public_key
             );
 
-
         }
-
-
-
 
 
 
@@ -297,10 +262,8 @@ static void benchmark_operation(
 
 
 
-
         uint32_t elapsed_time =
             time_us_32() - start_time;
-
 
 
 
@@ -311,11 +274,9 @@ static void benchmark_operation(
 
 
 
-
         result.total_time += elapsed_time;
 
         result.total_cycles += elapsed_cycles;
-
 
 
 
@@ -335,10 +296,9 @@ static void benchmark_operation(
 
 
 
-
-
         double delta =
             elapsed_time - mean;
+
 
 
         mean += delta/(i+1);
@@ -378,10 +338,7 @@ static void benchmark_total_sign()
     result.min_time = 0xffffffff;
 
 
-
     double mean = 0;
-
-
 
 
 
@@ -406,31 +363,28 @@ static void benchmark_total_sign()
 
 
 
-
-        PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(
+        PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
 
 
 
-
-        PQCLEAN_FALCON1024_CLEAN_crypto_sign_signature(
+        PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_signature(
             signature,
-            &signature_length,
+            &signature_len,
             message,
-            sizeof(message)-1,
+            sizeof(message),
             secret_key
         );
 
 
 
-
-        PQCLEAN_FALCON1024_CLEAN_crypto_sign_verify(
+        PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_verify(
             signature,
-            signature_length,
+            signature_len,
             message,
-            sizeof(message)-1,
+            sizeof(message),
             public_key
         );
 
@@ -457,13 +411,9 @@ static void benchmark_total_sign()
 
 
 
-
-
         result.total_time += elapsed_time;
 
         result.total_cycles += elapsed_cycles;
-
-
 
 
 
@@ -477,8 +427,6 @@ static void benchmark_total_sign()
         if(elapsed_time > result.max_time)
 
             result.max_time = elapsed_time;
-
-
 
 
 
@@ -502,15 +450,10 @@ static void benchmark_total_sign()
 
 
 
-
-
-
-
     print_result(
         "Total Sign",
         &result
     );
-
 
 }
 
@@ -530,14 +473,11 @@ void run_benchmark(void)
 
 
 
-
     printf("\n");
 
     printf("============================================================\n");
-    printf("              Falcon-1024 Benchmark Results\n");
+    printf("          SPHINCS+-SHA2-128s-simple Benchmark Results\n");
     printf("============================================================\n\n");
-
-
 
 
 
@@ -546,14 +486,10 @@ void run_benchmark(void)
 
 
 
-
-
-
     for(int i = 0; i < WARMUP; i++)
     {
 
-
-        PQCLEAN_FALCON1024_CLEAN_crypto_sign_keypair(
+        PQCLEAN_SPHINCSSHA2128SSIMPLE_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
@@ -562,12 +498,7 @@ void run_benchmark(void)
 
 
 
-
-
     printf("Warmup complete\n\n");
-
-
-
 
 
 
@@ -578,17 +509,11 @@ void run_benchmark(void)
 
 
 
-
-
-
     printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
 
     printf("| Operation      | Mean (us)   | Mean (ms)   | Cycles      | Min (us)    | Max (us)    | Std Dev    |\n");
 
     printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
-
-
-
 
 
 
@@ -621,9 +546,7 @@ void run_benchmark(void)
 
 
 
-
     printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
-
 
 
     printf("\nBenchmark completed.\n");

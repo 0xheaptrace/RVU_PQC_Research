@@ -23,24 +23,35 @@ add_executable(pqc_pico
     src/randombytes.c
 
 
-    # Falcon-1024 PQClean Clean implementation
+    # SPHINCS+-SHA2-128s-simple PQClean Clean implementation
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/codec.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/common.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/fft.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/fpr.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/keygen.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/pqclean.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/rng.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/sign.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean/vrfy.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/address.c
 
-    # PQClean common sources
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/fips202.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/aes.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/context_sha2.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/fors.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/hash_sha2.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/merkle.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/sign.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/thash_sha2_simple.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/utils.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/utilsx1.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/wots.c
+
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean/wotsx1.c
+
+
+    # PQClean common SHA2
+
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/sha2.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/nistseedexpander.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/sp800-185.c
+
 )
 
 
@@ -53,15 +64,10 @@ target_include_directories(
     ${CMAKE_CURRENT_LIST_DIR}/src
 
 
-    # Falcon-1024 headers
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-128s-simple/clean
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-1024/clean
-
-
-    # PQClean common headers
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common
-
 
 )
 
