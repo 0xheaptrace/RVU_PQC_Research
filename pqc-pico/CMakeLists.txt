@@ -23,22 +23,23 @@ add_executable(pqc_pico
     src/randombytes.c
 
 
-    # ML-KEM-1024 PQClean Clean implementation
+    # Falcon-512 PQClean Clean implementation
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/kem.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/indcpa.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/poly.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/polyvec.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/ntt.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/reduce.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/cbd.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/symmetric-shake.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean/verify.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/sign.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/keygen.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/fft.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/fpr.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/codec.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/common.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/rng.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/vrfy.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean/pqclean.c
 
 
-    # PQClean common crypto
+    # PQClean common
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/fips202.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/sha2.c
 
 )
 
@@ -48,24 +49,16 @@ add_executable(pqc_pico
 
 target_include_directories(
     pqc_pico
-    PRIVATE
 
+    PRIVATE
 
     ${CMAKE_CURRENT_LIST_DIR}/src
 
-
-    # ML-KEM-1024 headers
-
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_kem/ml-kem-1024/clean
-
-
-    # PQClean common headers
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/falcon-512/clean
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common
 
 )
-
-
 
 
 
@@ -78,7 +71,6 @@ target_link_libraries(
     pico_rand
 
     hardware_clocks
-
 )
 
 

@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <math.h>
+#include <string.h>
+
 
 #include "pico/stdlib.h"
 
@@ -11,30 +13,35 @@
 #include "api.h"
 
 
-#define ITERATIONS 10000
-#define WARMUP 100
+
+#define ITERATIONS 100
+#define WARMUP 3
+
 
 
 
 static uint8_t public_key[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_FALCON512_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
+
 
 static uint8_t secret_key[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_FALCON512_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
-static uint8_t ciphertext[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_CIPHERTEXTBYTES
+
+static uint8_t signature[
+    PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES
 ];
 
-static uint8_t shared_secret_enc[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_BYTES
-];
 
-static uint8_t shared_secret_dec[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_BYTES
-];
+static uint8_t message[] =
+    "Falcon-512 benchmark message";
+
+
+static size_t signature_length;
+
+
 
 
 
@@ -60,34 +67,25 @@ typedef struct
 
 
 
+
 /*
- * ARM Cortex-M33 DWT Cycle Counter
+ * ARM Cortex-M33 DWT CYCCNT
  */
+
 
 static inline void enable_cycle_counter(void)
 {
 
-    /*
-     * Enable trace unit
-     */
-
     m33_hw->demcr |= M33_DEMCR_TRCENA_BITS;
 
-
-    /*
-     * Reset counter
-     */
 
     m33_hw->dwt_cyccnt = 0;
 
 
-    /*
-     * Enable CYCCNT
-     */
-
     m33_hw->dwt_ctrl |= M33_DWT_CTRL_CYCCNTENA_BITS;
 
 }
+
 
 
 
@@ -100,6 +98,7 @@ static inline uint32_t read_cycle_counter(void)
     return (uint32_t)m33_hw->dwt_cyccnt;
 
 }
+
 
 
 
@@ -138,6 +137,8 @@ void print_processor_info(void)
 
 
 
+
+
 static double calculate_stddev(
         benchmark_result_t *result)
 {
@@ -154,11 +155,13 @@ static double calculate_stddev(
 
 
 
+
+
+
 static void print_result(
         const char *name,
         benchmark_result_t *result)
 {
-
 
     uint64_t mean_time =
         result->total_time / ITERATIONS;
@@ -203,7 +206,6 @@ static void benchmark_operation(
         int operation)
 {
 
-
     benchmark_result_t result = {0};
 
 
@@ -212,6 +214,7 @@ static void benchmark_operation(
 
 
     double mean = 0;
+
 
 
 
@@ -225,10 +228,6 @@ static void benchmark_operation(
 
 
 
-        /*
-         * Reset DWT counter
-         */
-
         m33_hw->dwt_cyccnt = 0;
 
 
@@ -240,11 +239,13 @@ static void benchmark_operation(
 
 
 
+
+
         if(operation == 0)
         {
 
 
-            PQCLEAN_MLKEM1024_CLEAN_crypto_kem_keypair(
+            PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
                 public_key,
                 secret_key
             );
@@ -257,10 +258,12 @@ static void benchmark_operation(
         {
 
 
-            PQCLEAN_MLKEM1024_CLEAN_crypto_kem_enc(
-                ciphertext,
-                shared_secret_enc,
-                public_key
+            PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(
+                signature,
+                &signature_length,
+                message,
+                sizeof(message)-1,
+                secret_key
             );
 
 
@@ -271,14 +274,18 @@ static void benchmark_operation(
         {
 
 
-            PQCLEAN_MLKEM1024_CLEAN_crypto_kem_dec(
-                shared_secret_dec,
-                ciphertext,
-                secret_key
+            PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
+                signature,
+                signature_length,
+                message,
+                sizeof(message)-1,
+                public_key
             );
 
 
         }
+
+
 
 
 
@@ -293,6 +300,7 @@ static void benchmark_operation(
 
         uint32_t elapsed_time =
             time_us_32() - start_time;
+
 
 
 
@@ -333,7 +341,6 @@ static void benchmark_operation(
             elapsed_time - mean;
 
 
-
         mean += delta/(i+1);
 
 
@@ -343,7 +350,6 @@ static void benchmark_operation(
 
 
     }
-
 
 
 
@@ -362,7 +368,7 @@ static void benchmark_operation(
 
 
 
-static void benchmark_total_kem()
+static void benchmark_total_sign()
 {
 
 
@@ -400,7 +406,8 @@ static void benchmark_total_kem()
 
 
 
-        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_keypair(
+
+        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
@@ -408,19 +415,23 @@ static void benchmark_total_kem()
 
 
 
-        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_enc(
-            ciphertext,
-            shared_secret_enc,
-            public_key
+        PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(
+            signature,
+            &signature_length,
+            message,
+            sizeof(message)-1,
+            secret_key
         );
 
 
 
 
-        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_dec(
-            shared_secret_dec,
-            ciphertext,
-            secret_key
+        PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
+            signature,
+            signature_length,
+            message,
+            sizeof(message)-1,
+            public_key
         );
 
 
@@ -434,8 +445,6 @@ static void benchmark_total_kem()
 
 
 
-
-
         uint32_t elapsed_time =
             time_us_32() - start_time;
 
@@ -443,6 +452,7 @@ static void benchmark_total_kem()
 
         uint32_t elapsed_cycles =
             end_cycles - start_cycles;
+
 
 
 
@@ -487,14 +497,17 @@ static void benchmark_total_kem()
             delta*(elapsed_time-mean);
 
 
+
     }
 
 
 
 
 
+
+
     print_result(
-        "Total KEM",
+        "Total Sign",
         &result
     );
 
@@ -521,7 +534,7 @@ void run_benchmark(void)
     printf("\n");
 
     printf("============================================================\n");
-    printf("              ML-KEM-1024 Benchmark Results\n");
+    printf("              Falcon-512 Benchmark Results\n");
     printf("============================================================\n\n");
 
 
@@ -535,15 +548,15 @@ void run_benchmark(void)
 
 
 
+
     for(int i = 0; i < WARMUP; i++)
     {
 
 
-        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_keypair(
+        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
-
 
     }
 
@@ -557,8 +570,10 @@ void run_benchmark(void)
 
 
 
+
     printf("Running benchmark: %d iterations\n\n",
            ITERATIONS);
+
 
 
 
@@ -586,24 +601,21 @@ void run_benchmark(void)
 
 
 
-
     benchmark_operation(
-        "Encapsulation",
+        "Signature Gen",
         1
     );
 
 
 
-
     benchmark_operation(
-        "Decapsulation",
+        "Verification",
         2
     );
 
 
 
-
-    benchmark_total_kem();
+    benchmark_total_sign();
 
 
 

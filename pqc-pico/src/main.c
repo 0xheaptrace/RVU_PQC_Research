@@ -14,33 +14,29 @@
 
 
 
-static uint8_t public_key[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_PUBLICKEYBYTES
-];
 
+static uint8_t public_key[
+    PQCLEAN_FALCON512_CLEAN_CRYPTO_PUBLICKEYBYTES
+];
 
 
 static uint8_t secret_key[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_FALCON512_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
-
-static uint8_t ciphertext[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_CIPHERTEXTBYTES
+static uint8_t signature[
+    PQCLEAN_FALCON512_CLEAN_CRYPTO_BYTES
 ];
 
 
-
-static uint8_t shared_secret_enc[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_BYTES
-];
+static uint8_t message[] =
+    "Falcon-512 functional validation message";
 
 
+static size_t signature_length;
 
-static uint8_t shared_secret_dec[
-    PQCLEAN_MLKEM1024_CLEAN_CRYPTO_BYTES
-];
+
 
 
 
@@ -55,7 +51,7 @@ static void print_banner(void)
     printf("\n");
 
     printf("============================================================\n");
-    printf("             ML-KEM-1024 Functional Validation\n");
+    printf("             Falcon-512 Functional Validation\n");
     printf("             Raspberry Pi Pico 2 W (RP2350)\n");
     printf("             PQClean Clean Implementation\n");
     printf("============================================================\n\n");
@@ -73,13 +69,10 @@ static void print_banner(void)
 int main(void)
 {
 
+
     stdio_init_all();
 
 
-
-    /*
-     * Wait for USB serial connection
-     */
 
     while(!stdio_usb_connected())
     {
@@ -89,7 +82,6 @@ int main(void)
 
 
     sleep_ms(1000);
-
 
 
 
@@ -104,12 +96,12 @@ int main(void)
 
 
 
-    printf("[1/4] Generating ML-KEM-1024 Key Pair...\n\n");
+    printf("[1/4] Generating Falcon-512 Key Pair...\n\n");
 
 
 
     if(
-        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_keypair(
+        PQCLEAN_FALCON512_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         ) != 0
@@ -136,53 +128,22 @@ int main(void)
 
 
 
-    printf("[2/4] Encapsulating Shared Secret...\n\n");
+    printf("[2/4] Generating Signature...\n\n");
 
 
 
     if(
-        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_enc(
-            ciphertext,
-            shared_secret_enc,
-            public_key
-        ) != 0
-    )
-    {
-
-        printf("ERROR: Encapsulation failed\n");
-
-
-        while(1)
-            tight_loop_contents();
-
-    }
-
-
-
-    printf("SUCCESS: Shared secret encapsulated successfully.\n\n");
-
-
-
-
-
-
-
-
-
-    printf("[3/4] Decapsulating Shared Secret...\n\n");
-
-
-
-    if(
-        PQCLEAN_MLKEM1024_CLEAN_crypto_kem_dec(
-            shared_secret_dec,
-            ciphertext,
+        PQCLEAN_FALCON512_CLEAN_crypto_sign_signature(
+            signature,
+            &signature_length,
+            message,
+            sizeof(message)-1,
             secret_key
         ) != 0
     )
     {
 
-        printf("ERROR: Decapsulation failed\n");
+        printf("ERROR: Signature generation failed\n");
 
 
         while(1)
@@ -192,7 +153,42 @@ int main(void)
 
 
 
-    printf("SUCCESS: Shared secret decapsulated successfully.\n\n");
+    printf("SUCCESS: Signature generated successfully.\n\n");
+
+
+
+
+
+
+
+
+
+    printf("[3/4] Verifying Signature...\n\n");
+
+
+
+    if(
+        PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
+            signature,
+            signature_length,
+            message,
+            sizeof(message)-1,
+            public_key
+        ) != 0
+    )
+    {
+
+        printf("ERROR: Signature verification failed\n");
+
+
+        while(1)
+            tight_loop_contents();
+
+    }
+
+
+
+    printf("SUCCESS: Signature verified successfully.\n\n");
 
 
 
@@ -207,7 +203,6 @@ int main(void)
 
 
 
-
     printf("=============================================\n");
     printf("           VERIFICATION RESULT\n");
     printf("=============================================\n");
@@ -216,28 +211,27 @@ int main(void)
 
 
 
-
-
-
     if(
-        memcmp(
-            shared_secret_enc,
-            shared_secret_dec,
-            PQCLEAN_MLKEM1024_CLEAN_CRYPTO_BYTES
+        PQCLEAN_FALCON512_CLEAN_crypto_sign_verify(
+            signature,
+            signature_length,
+            message,
+            sizeof(message)-1,
+            public_key
         ) == 0
     )
     {
 
-        printf("PASS: Shared secrets match.\n");
-        printf("ML-KEM-1024 functional validation successful.\n");
+        printf("PASS: Signature is valid.\n");
+        printf("Falcon-512 functional validation successful.\n");
 
     }
 
     else
     {
 
-        printf("FAIL: Shared secrets do not match.\n");
-        printf("ML-KEM-1024 functional validation failed.\n");
+        printf("FAIL: Signature verification failed.\n");
+        printf("Falcon-512 functional validation failed.\n");
 
     }
 
@@ -275,7 +269,6 @@ int main(void)
         tight_loop_contents();
 
     }
-
 
 
 
