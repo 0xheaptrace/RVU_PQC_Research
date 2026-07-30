@@ -1,119 +1,69 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "pico/stdlib.h"
-#include "pico/stdio_usb.h"
 
 #include "api.h"
 #include "benchmark.h"
 
 
+#define MESSAGE "PQC ML-DSA-87 Benchmark Test"
 
-static uint8_t public_key[
-    PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_PUBLICKEYBYTES
+
+uint8_t public_key[
+    PQCLEAN_MLDSA87_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
-static uint8_t secret_key[
-    PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_SECRETKEYBYTES
+uint8_t secret_key[
+    PQCLEAN_MLDSA87_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
-static uint8_t signature[
-    PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_BYTES
+uint8_t signature[
+    PQCLEAN_MLDSA87_CLEAN_CRYPTO_BYTES
 ];
 
 
-static size_t signature_len;
+uint8_t message[] = MESSAGE;
 
 
 
-static uint8_t message[] =
-    "SPHINCS+-SHA2-192s-simple Functional Validation";
-
-
-
-
-
-
-static void print_banner(void)
+void functional_validation(void)
 {
 
-    printf("\n");
+    size_t siglen;
 
+
+    printf("\n");
     printf("============================================================\n");
-    printf("             SPHINCS+-SHA2-192s-simple Functional Validation\n");
+    printf("             ML-DSA-87 Functional Validation\n");
     printf("             Raspberry Pi Pico 2 W (RP2350)\n");
     printf("             PQClean Clean Implementation\n");
     printf("============================================================\n\n");
 
-}
+
+
+    printf("[1/4] Generating ML-DSA-87 Key Pair...\n\n");
 
 
 
+    int result =
+    PQCLEAN_MLDSA87_CLEAN_crypto_sign_keypair(
+        public_key,
+        secret_key
+    );
 
 
-
-
-
-
-int main(void)
-{
-
-    stdio_init_all();
-
-
-
-    while(!stdio_usb_connected())
+    if(result != 0)
     {
-        sleep_ms(100);
-    }
-
-
-
-    sleep_ms(1000);
-
-
-
-    print_banner();
-
-
-
-
-
-
-
-
-    printf("[1/4] Generating SPHINCS+-SHA2-192s Key Pair...\n\n");
-
-
-
-    if(
-        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_keypair(
-            public_key,
-            secret_key
-        ) != 0
-    )
-    {
-
         printf("ERROR: Key generation failed\n");
-
-
-        while(1)
-            tight_loop_contents();
-
+        return;
     }
-
 
 
     printf("SUCCESS: Key pair generated successfully.\n\n");
-
-
-
-
-
-
 
 
 
@@ -121,34 +71,24 @@ int main(void)
 
 
 
-    if(
-        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_signature(
-            signature,
-            &signature_len,
-            message,
-            sizeof(message),
-            secret_key
-        ) != 0
-    )
+    result =
+    PQCLEAN_MLDSA87_CLEAN_crypto_sign_signature(
+        signature,
+        &siglen,
+        message,
+        sizeof(message),
+        secret_key
+    );
+
+
+    if(result != 0)
     {
-
         printf("ERROR: Signature generation failed\n");
-
-
-        while(1)
-            tight_loop_contents();
-
+        return;
     }
 
 
-
     printf("SUCCESS: Signature generated successfully.\n\n");
-
-
-
-
-
-
 
 
 
@@ -156,86 +96,58 @@ int main(void)
 
 
 
-    if(
-        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_verify(
-            signature,
-            signature_len,
-            message,
-            sizeof(message),
-            public_key
-        ) != 0
-    )
+    result =
+    PQCLEAN_MLDSA87_CLEAN_crypto_sign_verify(
+        signature,
+        siglen,
+        message,
+        sizeof(message),
+        public_key
+    );
+
+
+
+    if(result != 0)
     {
-
         printf("ERROR: Signature verification failed\n");
-
-
-        while(1)
-            tight_loop_contents();
-
+        return;
     }
-
 
 
     printf("SUCCESS: Signature verified successfully.\n\n");
 
 
 
-
-
-
-
-
-
     printf("[4/4] Verification Result...\n\n");
-
-
-
 
 
     printf("=============================================\n");
     printf("           VERIFICATION RESULT\n");
     printf("=============================================\n");
 
-
-
-
-
-
-
-    if(
-        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_verify(
-            signature,
-            signature_len,
-            message,
-            sizeof(message),
-            public_key
-        ) == 0
-    )
-    {
-
-        printf("PASS: Signature is valid.\n");
-        printf("SPHINCS+-SHA2-192s-simple functional validation successful.\n");
-
-    }
-
-    else
-    {
-
-        printf("FAIL: Signature is invalid.\n");
-        printf("SPHINCS+-SHA2-192s-simple functional validation failed.\n");
-
-    }
-
-
-
-
-
+    printf("PASS: Signature is valid.\n");
+    printf("ML-DSA-87 functional validation successful.\n");
 
     printf("=============================================\n\n");
 
 
+}
 
+
+
+
+
+int main()
+{
+
+    stdio_init_all();
+
+
+    sleep_ms(3000);
+
+
+
+    functional_validation();
 
 
 
@@ -247,18 +159,12 @@ int main(void)
 
 
 
-
-
-
-
-
     while(1)
     {
 
         tight_loop_contents();
 
     }
-
 
 
     return 0;

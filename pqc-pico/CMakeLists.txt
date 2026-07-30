@@ -4,9 +4,7 @@ set(PICO_BOARD pico2_w)
 
 include(pico_sdk_import.cmake)
 
-
 project(pqc_pico C CXX ASM)
-
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
@@ -23,53 +21,38 @@ add_executable(pqc_pico
     src/randombytes.c
 
 
-    # SPHINCS+-SHA2-192s-simple PQClean Clean implementation
+    # ML-DSA-87 PQClean Clean Implementation
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/address.c
-
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/context_sha2.c
-
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/fors.c
-
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/hash_sha2.c
-
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/merkle.c
-
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/sign.c
-
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/thash_sha2_simple.c
-
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/utils.c
-
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/utilsx1.c
-
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/wots.c
-
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean/wotsx1.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/sign.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/ntt.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/packing.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/poly.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/polyvec.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/reduce.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/rounding.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/symmetric-shake.c
 
 
+    # PQClean common dependency
 
-    # PQClean common SHA implementations
-
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/sha2.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/fips202.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/randombytes.c
 
 )
 
 
 
 target_include_directories(
-
     pqc_pico
 
     PRIVATE
 
-
     ${CMAKE_CURRENT_LIST_DIR}/src
 
 
-    # SPHINCS+-SHA2-192s-simple headers
+    # ML-DSA headers
 
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/sphincs-sha2-192s-simple/clean
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean
 
 
     # PQClean common headers

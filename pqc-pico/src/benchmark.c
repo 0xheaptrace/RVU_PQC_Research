@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <math.h>
-#include <string.h>
 
 #include "pico/stdlib.h"
 
@@ -12,46 +11,35 @@
 #include "api.h"
 
 
-
-#define ITERATIONS 10
-#define WARMUP 1
+#define ITERATIONS 10000
+#define WARMUP 100
 
 
 
 static uint8_t public_key[
-    PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_PUBLICKEYBYTES
+    PQCLEAN_MLDSA87_CLEAN_CRYPTO_PUBLICKEYBYTES
 ];
 
 
 static uint8_t secret_key[
-    PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_SECRETKEYBYTES
+    PQCLEAN_MLDSA87_CLEAN_CRYPTO_SECRETKEYBYTES
 ];
 
 
 static uint8_t signature[
-    PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_CRYPTO_BYTES
+    PQCLEAN_MLDSA87_CLEAN_CRYPTO_BYTES
 ];
 
 
-static size_t signature_len;
-
-
-
-static uint8_t message[] =
-    "SPHINCS+-SHA2-192s-simple Benchmark";
-
-
+static uint8_t message[] = "PQC Benchmark Message";
 
 
 typedef struct
 {
-
     uint64_t total_time;
-
     uint64_t total_cycles;
 
     uint32_t min_time;
-
     uint32_t max_time;
 
     double variance;
@@ -60,27 +48,20 @@ typedef struct
 
 
 
-
-
 /*
  * ARM Cortex-M33 DWT Cycle Counter
  */
-
 
 static inline void enable_cycle_counter(void)
 {
 
     m33_hw->demcr |= M33_DEMCR_TRCENA_BITS;
 
-
     m33_hw->dwt_cyccnt = 0;
-
 
     m33_hw->dwt_ctrl |= M33_DWT_CTRL_CYCCNTENA_BITS;
 
 }
-
-
 
 
 
@@ -105,9 +86,7 @@ void print_processor_info(void)
 
 
     printf("Architecture : ARM Cortex-M33\n");
-
     printf("Core         : RP2350 Cortex-M33\n");
-
     printf("Cycle Counter: ARM Cortex-M33 DWT CYCCNT\n");
 
     printf("Compiler     : %s\n",
@@ -131,8 +110,6 @@ static double calculate_stddev(
     );
 
 }
-
-
 
 
 
@@ -178,13 +155,10 @@ static void print_result(
 
 
 
-
-
 static void benchmark_operation(
         const char *name,
         int operation)
 {
-
 
     benchmark_result_t result = {0};
 
@@ -204,7 +178,6 @@ static void benchmark_operation(
             time_us_32();
 
 
-
         m33_hw->dwt_cyccnt = 0;
 
 
@@ -213,12 +186,10 @@ static void benchmark_operation(
 
 
 
-
-
         if(operation == 0)
         {
 
-            PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_keypair(
+            PQCLEAN_MLDSA87_CLEAN_crypto_sign_keypair(
                 public_key,
                 secret_key
             );
@@ -229,9 +200,12 @@ static void benchmark_operation(
         else if(operation == 1)
         {
 
-            PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_signature(
+            size_t siglen;
+
+
+            PQCLEAN_MLDSA87_CLEAN_crypto_sign_signature(
                 signature,
-                &signature_len,
+                &siglen,
                 message,
                 sizeof(message),
                 secret_key
@@ -243,16 +217,15 @@ static void benchmark_operation(
         else
         {
 
-            PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_verify(
+            PQCLEAN_MLDSA87_CLEAN_crypto_sign_verify(
                 signature,
-                signature_len,
+                PQCLEAN_MLDSA87_CLEAN_CRYPTO_BYTES,
                 message,
                 sizeof(message),
                 public_key
             );
 
         }
-
 
 
 
@@ -266,11 +239,8 @@ static void benchmark_operation(
             time_us_32() - start_time;
 
 
-
         uint32_t elapsed_cycles =
             end_cycles - start_cycles;
-
-
 
 
 
@@ -280,19 +250,12 @@ static void benchmark_operation(
 
 
 
-
-
         if(elapsed_time < result.min_time)
-
             result.min_time = elapsed_time;
 
 
-
         if(elapsed_time > result.max_time)
-
             result.max_time = elapsed_time;
-
-
 
 
 
@@ -300,9 +263,7 @@ static void benchmark_operation(
             elapsed_time - mean;
 
 
-
         mean += delta/(i+1);
-
 
 
         result.variance +=
@@ -310,7 +271,6 @@ static void benchmark_operation(
 
 
     }
-
 
 
     print_result(
@@ -324,13 +284,8 @@ static void benchmark_operation(
 
 
 
-
-
-
-
 static void benchmark_total_sign()
 {
-
 
     benchmark_result_t result = {0};
 
@@ -350,9 +305,7 @@ static void benchmark_total_sign()
             time_us_32();
 
 
-
         m33_hw->dwt_cyccnt = 0;
-
 
 
         uint32_t start_cycles =
@@ -361,35 +314,31 @@ static void benchmark_total_sign()
 
 
 
-
-
-        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_keypair(
+        PQCLEAN_MLDSA87_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
 
 
+        size_t siglen;
 
-        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_signature(
+
+        PQCLEAN_MLDSA87_CLEAN_crypto_sign_signature(
             signature,
-            &signature_len,
+            &siglen,
             message,
             sizeof(message),
             secret_key
         );
 
 
-
-        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_verify(
+        PQCLEAN_MLDSA87_CLEAN_crypto_sign_verify(
             signature,
-            signature_len,
+            siglen,
             message,
             sizeof(message),
             public_key
         );
-
-
-
 
 
 
@@ -403,11 +352,8 @@ static void benchmark_total_sign()
             time_us_32() - start_time;
 
 
-
         uint32_t elapsed_cycles =
             end_cycles - start_cycles;
-
-
 
 
 
@@ -417,17 +363,12 @@ static void benchmark_total_sign()
 
 
 
-
         if(elapsed_time < result.min_time)
-
             result.min_time = elapsed_time;
 
 
-
         if(elapsed_time > result.max_time)
-
             result.max_time = elapsed_time;
-
 
 
 
@@ -436,14 +377,11 @@ static void benchmark_total_sign()
             elapsed_time - mean;
 
 
-
         mean += delta/(i+1);
-
 
 
         result.variance +=
             delta*(elapsed_time-mean);
-
 
 
     }
@@ -461,10 +399,6 @@ static void benchmark_total_sign()
 
 
 
-
-
-
-
 void run_benchmark(void)
 {
 
@@ -476,7 +410,7 @@ void run_benchmark(void)
     printf("\n");
 
     printf("============================================================\n");
-    printf("          SPHINCS+-SHA2-192s-simple Benchmark Results\n");
+    printf("              ML-DSA-87 Benchmark Results\n");
     printf("============================================================\n\n");
 
 
@@ -489,13 +423,12 @@ void run_benchmark(void)
     for(int i = 0; i < WARMUP; i++)
     {
 
-        PQCLEAN_SPHINCSSHA2192SSIMPLE_CLEAN_crypto_sign_keypair(
+        PQCLEAN_MLDSA87_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
 
     }
-
 
 
     printf("Warmup complete\n\n");
@@ -508,14 +441,11 @@ void run_benchmark(void)
 
 
 
-
     printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
 
     printf("| Operation      | Mean (us)   | Mean (ms)   | Cycles      | Min (us)    | Max (us)    | Std Dev    |\n");
 
     printf("+----------------+-------------+-------------+-------------+-------------+-------------+------------+\n");
-
-
 
 
 
@@ -525,12 +455,10 @@ void run_benchmark(void)
     );
 
 
-
     benchmark_operation(
         "Signature Gen",
         1
     );
-
 
 
     benchmark_operation(
@@ -539,10 +467,7 @@ void run_benchmark(void)
     );
 
 
-
     benchmark_total_sign();
-
-
 
 
 
