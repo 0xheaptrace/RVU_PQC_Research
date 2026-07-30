@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 #include <math.h>
+#include <string.h>
 
 #include "pico/stdlib.h"
 
@@ -31,15 +32,26 @@ static uint8_t signature[
 ];
 
 
-static uint8_t message[] = "PQC Benchmark Message";
+static uint8_t message[] =
+{
+    "ML-DSA-87 Benchmark Message"
+};
+
+
+static size_t signature_length;
+
+
+
 
 
 typedef struct
 {
     uint64_t total_time;
+
     uint64_t total_cycles;
 
     uint32_t min_time;
+
     uint32_t max_time;
 
     double variance;
@@ -48,20 +60,29 @@ typedef struct
 
 
 
+
+
+
+
 /*
  * ARM Cortex-M33 DWT Cycle Counter
  */
+
 
 static inline void enable_cycle_counter(void)
 {
 
     m33_hw->demcr |= M33_DEMCR_TRCENA_BITS;
 
+
     m33_hw->dwt_cyccnt = 0;
+
 
     m33_hw->dwt_ctrl |= M33_DWT_CTRL_CYCCNTENA_BITS;
 
 }
+
+
 
 
 
@@ -71,6 +92,9 @@ static inline uint32_t read_cycle_counter(void)
     return (uint32_t)m33_hw->dwt_cyccnt;
 
 }
+
+
+
 
 
 
@@ -86,7 +110,9 @@ void print_processor_info(void)
 
 
     printf("Architecture : ARM Cortex-M33\n");
+
     printf("Core         : RP2350 Cortex-M33\n");
+
     printf("Cycle Counter: ARM Cortex-M33 DWT CYCCNT\n");
 
     printf("Compiler     : %s\n",
@@ -101,6 +127,9 @@ void print_processor_info(void)
 
 
 
+
+
+
 static double calculate_stddev(
         benchmark_result_t *result)
 {
@@ -110,6 +139,9 @@ static double calculate_stddev(
     );
 
 }
+
+
+
 
 
 
@@ -155,15 +187,21 @@ static void print_result(
 
 
 
+
+
+
+
 static void benchmark_operation(
         const char *name,
         int operation)
 {
 
+
     benchmark_result_t result = {0};
 
 
     result.min_time = 0xffffffff;
+
 
 
     double mean = 0;
@@ -178,7 +216,9 @@ static void benchmark_operation(
             time_us_32();
 
 
+
         m33_hw->dwt_cyccnt = 0;
+
 
 
         uint32_t start_cycles =
@@ -186,13 +226,18 @@ static void benchmark_operation(
 
 
 
+
+
+
         if(operation == 0)
         {
+
 
             PQCLEAN_MLDSA87_CLEAN_crypto_sign_keypair(
                 public_key,
                 secret_key
             );
+
 
         }
 
@@ -200,16 +245,15 @@ static void benchmark_operation(
         else if(operation == 1)
         {
 
-            size_t siglen;
-
 
             PQCLEAN_MLDSA87_CLEAN_crypto_sign_signature(
                 signature,
-                &siglen,
+                &signature_length,
                 message,
                 sizeof(message),
                 secret_key
             );
+
 
         }
 
@@ -217,15 +261,19 @@ static void benchmark_operation(
         else
         {
 
+
             PQCLEAN_MLDSA87_CLEAN_crypto_sign_verify(
                 signature,
-                PQCLEAN_MLDSA87_CLEAN_CRYPTO_BYTES,
+                signature_length,
                 message,
                 sizeof(message),
                 public_key
             );
 
+
         }
+
+
 
 
 
@@ -235,12 +283,19 @@ static void benchmark_operation(
 
 
 
+
+
+
         uint32_t elapsed_time =
             time_us_32() - start_time;
 
 
+
         uint32_t elapsed_cycles =
             end_cycles - start_cycles;
+
+
+
 
 
 
@@ -250,12 +305,22 @@ static void benchmark_operation(
 
 
 
+
+
+
         if(elapsed_time < result.min_time)
+
             result.min_time = elapsed_time;
 
 
+
         if(elapsed_time > result.max_time)
+
             result.max_time = elapsed_time;
+
+
+
+
 
 
 
@@ -263,14 +328,18 @@ static void benchmark_operation(
             elapsed_time - mean;
 
 
+
         mean += delta/(i+1);
+
 
 
         result.variance +=
             delta*(elapsed_time-mean);
 
 
+
     }
+
 
 
     print_result(
@@ -284,13 +353,19 @@ static void benchmark_operation(
 
 
 
-static void benchmark_total_sign()
+
+
+
+
+static void benchmark_total_signature()
 {
+
 
     benchmark_result_t result = {0};
 
 
     result.min_time = 0xffffffff;
+
 
 
     double mean = 0;
@@ -305,11 +380,16 @@ static void benchmark_total_sign()
             time_us_32();
 
 
+
         m33_hw->dwt_cyccnt = 0;
+
 
 
         uint32_t start_cycles =
             read_cycle_counter();
+
+
+
 
 
 
@@ -320,25 +400,30 @@ static void benchmark_total_sign()
         );
 
 
-        size_t siglen;
 
 
         PQCLEAN_MLDSA87_CLEAN_crypto_sign_signature(
             signature,
-            &siglen,
+            &signature_length,
             message,
             sizeof(message),
             secret_key
         );
 
 
+
+
+
         PQCLEAN_MLDSA87_CLEAN_crypto_sign_verify(
             signature,
-            siglen,
+            signature_length,
             message,
             sizeof(message),
             public_key
         );
+
+
+
 
 
 
@@ -348,12 +433,19 @@ static void benchmark_total_sign()
 
 
 
+
+
+
         uint32_t elapsed_time =
             time_us_32() - start_time;
 
 
+
         uint32_t elapsed_cycles =
             end_cycles - start_cycles;
+
+
+
 
 
 
@@ -363,12 +455,20 @@ static void benchmark_total_sign()
 
 
 
+
+
+
         if(elapsed_time < result.min_time)
+
             result.min_time = elapsed_time;
 
 
+
         if(elapsed_time > result.max_time)
+
             result.max_time = elapsed_time;
+
+
 
 
 
@@ -377,11 +477,14 @@ static void benchmark_total_sign()
             elapsed_time - mean;
 
 
+
         mean += delta/(i+1);
+
 
 
         result.variance +=
             delta*(elapsed_time-mean);
+
 
 
     }
@@ -399,11 +502,16 @@ static void benchmark_total_sign()
 
 
 
+
+
+
+
 void run_benchmark(void)
 {
 
 
     enable_cycle_counter();
+
 
 
 
@@ -415,28 +523,40 @@ void run_benchmark(void)
 
 
 
+
+
     printf("Warmup iterations: %d\n",
            WARMUP);
+
 
 
 
     for(int i = 0; i < WARMUP; i++)
     {
 
+
         PQCLEAN_MLDSA87_CLEAN_crypto_sign_keypair(
             public_key,
             secret_key
         );
 
+
     }
+
+
+
 
 
     printf("Warmup complete\n\n");
 
 
 
+
+
     printf("Running benchmark: %d iterations\n\n",
            ITERATIONS);
+
+
 
 
 
@@ -449,10 +569,14 @@ void run_benchmark(void)
 
 
 
+
+
+
     benchmark_operation(
         "Key Generation",
         0
     );
+
 
 
     benchmark_operation(
@@ -461,13 +585,18 @@ void run_benchmark(void)
     );
 
 
+
     benchmark_operation(
         "Verification",
         2
     );
 
 
-    benchmark_total_sign();
+
+    benchmark_total_signature();
+
+
+
 
 
 

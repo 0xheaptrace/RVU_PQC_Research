@@ -4,7 +4,9 @@ set(PICO_BOARD pico2_w)
 
 include(pico_sdk_import.cmake)
 
+
 project(pqc_pico C CXX ASM)
+
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
@@ -21,11 +23,11 @@ add_executable(pqc_pico
     src/randombytes.c
 
 
-    # ML-DSA-87 PQClean Clean Implementation
+    # ML-DSA-87 PQClean Clean implementation
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/sign.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/ntt.c
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/packing.c
+    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/ntt.c
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/poly.c
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/polyvec.c
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/reduce.c
@@ -33,29 +35,30 @@ add_executable(pqc_pico
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean/symmetric-shake.c
 
 
-    # PQClean common dependency
+    # PQClean common
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/fips202.c
-    ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common/randombytes.c
 
 )
 
 
 
+
+
 target_include_directories(
     pqc_pico
-
     PRIVATE
+
 
     ${CMAKE_CURRENT_LIST_DIR}/src
 
 
-    # ML-DSA headers
+    # ML-DSA-87 headers
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/crypto_sign/ml-dsa-87/clean
 
 
-    # PQClean common headers
+    # PQClean common
 
     ${CMAKE_CURRENT_LIST_DIR}/../PQClean/common
 
@@ -63,8 +66,9 @@ target_include_directories(
 
 
 
-target_link_libraries(
 
+
+target_link_libraries(
     pqc_pico
 
     pico_stdlib
@@ -73,6 +77,8 @@ target_link_libraries(
     hardware_clocks
 
 )
+
+
 
 
 
